@@ -1,0 +1,11 @@
+# Credenciales y configuración privada
+.env
+.env.*
+!.env.example
+
+# Archivos locales
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
