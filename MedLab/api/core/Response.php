@@ -31,13 +31,4 @@ class Response
         ]));
     }
 
-    // Solo para depurar mientras desarrollas. No dejar llamadas activas.
-    static function debug($error = null, $errorTh = null)
-    {
-        if ($error) {
-            exit(json_encode($error));
-        } else {
-            exit(json_encode($errorTh->getMessage()));
-        }
-    }
 }

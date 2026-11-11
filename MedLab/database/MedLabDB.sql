@@ -7,7 +7,8 @@ USE MedLabDB;
 CREATE TABLE roles (
     id_rol INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(30) NOT NULL UNIQUE,
-    descripcion VARCHAR(150)
+    descripcion VARCHAR(150),
+    es_administrador BOOLEAN NOT NULL DEFAULT FALSE
 ) ENGINE = InnoDB;
 
 CREATE TABLE categorias (
@@ -21,6 +22,13 @@ CREATE TABLE estados_equipo (
     id_estado INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(30) NOT NULL UNIQUE,
     descripcion VARCHAR(150)
+) ENGINE = InnoDB;
+
+CREATE TABLE marcas (
+    id_marca INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE,
+    descripcion VARCHAR(150),
+    activo BOOLEAN NOT NULL DEFAULT TRUE
 ) ENGINE = InnoDB;
 
 CREATE TABLE condiciones_equipo (
@@ -45,6 +53,7 @@ CREATE TABLE usuarios (
     telefono VARCHAR(20),
     id_rol INT NOT NULL,
     activo BOOLEAN NOT NULL DEFAULT TRUE,
+    version_sesion INT UNSIGNED NOT NULL DEFAULT 1,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_usuario_rol
@@ -54,12 +63,22 @@ CREATE TABLE usuarios (
         ON UPDATE RESTRICT
 ) ENGINE = InnoDB;
 
+-- Contadores compartidos entre sesiones y procesos; nunca guarda contraseñas.
+CREATE TABLE intentos_login (
+    clave CHAR(64) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
+    intentos INT UNSIGNED NOT NULL DEFAULT 0,
+    ventana_inicio DATETIME NOT NULL,
+    bloqueado_hasta DATETIME NULL,
+    actualizado_en DATETIME NOT NULL,
+    INDEX idx_intentos_login_actualizado (actualizado_en)
+) ENGINE = InnoDB;
+
 CREATE TABLE equipos (
     id_equipo INT AUTO_INCREMENT PRIMARY KEY,
     codigo_inventario VARCHAR(30) NOT NULL UNIQUE,
     nombre VARCHAR(100) NOT NULL,
     descripcion TEXT,
-    marca VARCHAR(50),
+    id_marca INT NULL,
     modelo VARCHAR(50),
     numero_serie VARCHAR(80) UNIQUE,
     id_categoria INT NOT NULL,
@@ -69,6 +88,12 @@ CREATE TABLE equipos (
     fecha_adquisicion DATE,
     activo BOOLEAN NOT NULL DEFAULT TRUE,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_equipo_marca
+        FOREIGN KEY (id_marca)
+        REFERENCES marcas(id_marca)
+        ON DELETE RESTRICT
+        ON UPDATE RESTRICT,
 
     CONSTRAINT fk_equipo_categoria
         FOREIGN KEY (id_categoria)

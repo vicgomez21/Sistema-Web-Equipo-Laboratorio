@@ -1,0 +1,12 @@
+Options -Indexes
+ServerSignature Off
+LimitRequestBody 16384
+
+# Configuración, SQL, documentación y herramientas CLI no son rutas públicas.
+RewriteEngine On
+RewriteRule ^(?:database|tests|docs|storage|includes|api/core|api/models)(?:/|$) - [F,END,NC]
+RewriteRule (^|/)\. - [F,END]
+
+<FilesMatch "(?i)(?:\.(?:sql|log|ini|env|bak|old|zip|md)|~)$">
+    Require all denied
+</FilesMatch>

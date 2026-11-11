@@ -1,4 +1,2 @@
-# Impide que el navegador pueda leer el archivo .env
-<Files ".env">
-    Require all denied
-</Files>
+# Solo se carga desde PHP; ninguna ruta de este directorio es pública.
+Require all denied
