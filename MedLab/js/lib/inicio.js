@@ -36,4 +36,23 @@ async function verificarConexion() {
     }
 }
 
-verificarConexion();
+if (document.querySelector('#estadoBadge')) verificarConexion();
+
+// Exploración de categorías: independiente de la conexión a la base de datos.
+const tarjetasCategoria = [...document.querySelectorAll('[data-category]')];
+document.querySelector('#buscarCategoria').addEventListener('input', (evento) => {
+    const normalizar = (texto) => texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const consulta = normalizar(evento.target.value.trim());
+    let visibles = 0;
+    tarjetasCategoria.forEach((tarjeta) => {
+        tarjeta.hidden = !normalizar(tarjeta.dataset.category + ' ' + tarjeta.dataset.description).includes(consulta);
+        if (!tarjeta.hidden) visibles++;
+    });
+    document.querySelector('#catalogCount').textContent = `${visibles} ${visibles === 1 ? 'categoría' : 'categorías'}`;
+    document.querySelector('#catalogEmpty').hidden = visibles !== 0;
+});
+tarjetasCategoria.forEach((tarjeta) => tarjeta.addEventListener('click', () => {
+    document.querySelector('#categoriaTitulo').textContent = tarjeta.dataset.category;
+    document.querySelector('#categoriaDescripcion').textContent = tarjeta.dataset.description;
+    document.querySelector('#detalleCategoria').showModal();
+}));

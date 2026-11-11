@@ -1,44 +1,80 @@
-# MedLab - Sistema de Gestión de Equipos de Laboratorio
+# MedLab — Gestión de equipos de laboratorio
 
-PHP nativo + MySQL (XAMPP). Etapa 2: menú hamburguesa y CRUD de **Roles** y **Usuarios**.
+PHP nativo + MySQL/MariaDB. Implementado: login, sesiones y CRUD administrativo de usuarios, roles, categorías, estados de equipo, condiciones de equipo y equipos. El inventario se configura en ese orden; la marca se captura dentro de Equipo. Los préstamos todavía están pendientes.
 
-## Instalación en XAMPP
-1. Copia la carpeta `MedLab` dentro de `C:\xampp\htdocs\`.
-2. En el Panel de XAMPP pulsa **Start** en **Apache** y **MySQL**.
-3. En `http://localhost/phpmyadmin` (pestaña **Importar**) importa `database/MedLabDB.sql`.
-4. En la pestaña **SQL** ejecuta `database/usuario_mysql.sql` (crea el usuario `usr_proyecto` del `.env`).
-5. Abre **http://localhost/MedLab/**
+## Instalación nueva en XAMPP
 
-## Configuración (`api/core/.env`)
-```
-DATABASE_URL=localhost:3310     # servidor:puerto (cambia a 3306 si tu MySQL usa el puerto por defecto)
-DATABASE_USER=usr_proyecto
-DATABASE_PSSW=...
+1. Copia MedLab dentro de `C:\xampp\htdocs\` y enciende Apache y MySQL.
+2. Importa `database/MedLabDB.sql` con una cuenta administradora de MySQL. Este archivo es para una base nueva; no lo importes sobre datos existentes.
+3. Copia `api/core/.env.example` a `api/core/.env`. Ajusta puerto, base, usuario exclusivo y contraseña.
+4. En `database/usuario_mysql.sql`, sustituye el marcador por una contraseña aleatoria única y ejecuta el SQL como DBA. Debe coincidir con el `.env`. El usuario de aplicación tiene únicamente SELECT, INSERT, UPDATE y DELETE.
+5. Crea el primer administrador desde terminal con una cuenta DBA configurada temporalmente para ese comando:
+
+   ```powershell
+   $env:DATABASE_USER = 'root'
+   $env:DATABASE_PSSW = Read-Host 'Contraseña DBA local' -MaskInput
+   C:\xampp\php\php.exe database/crear_admin.php
+   Remove-Item Env:DATABASE_USER,Env:DATABASE_PSSW
+   ```
+
+   Ejecuta el aprovisionamiento administrativo como tarea DBA separada del servicio web. Las variables del proceso prevalecen sobre `.env` y no cambian el archivo. El script pide la contraseña del nuevo usuario y avisa que será visible en terminal. Evita grabar la sesión.
+6. Abre [MedLab local](http://localhost/MedLab/) e inicia sesión. Solo administradores acceden a los CRUD, usuarios, roles y diagnóstico.
+
+## Instalación existente
+
+Respalda la base y detén escrituras durante el cambio. Ejecuta `database/migrations/20261103_seguridad_marcas.sql` como DBA antes de usar el código actualizado. Conserva marcas anteriores, agrega versiones de sesión y actualiza el formato anterior de los contadores de login. Es repetible; las operaciones DDL hacen commits implícitos.
+
+Usa un usuario MySQL exclusivo de MedLab. No revoques permisos ni cambies la contraseña de una cuenta compartida con otras aplicaciones sin coordinarlas. El script de permisos afecta únicamente `usr_medlab`; no modifica cuentas anteriores de otros proyectos.
+
+## Configuración
+
+```dotenv
+APP_NAME=MedLab
+APP_ENV=local
+DATABASE_URL=localhost:3310
+DATABASE_USER=usr_medlab
+DATABASE_PSSW=UNA_CLAVE_ALEATORIA_EXCLUSIVA
 DATABASE_NAME=MedLabDB
 DATABASE_CHARSET=utf8mb4
 ```
-Para usar `root` sin contraseña: `DATABASE_USER=root` y `DATABASE_PSSW=` (vacío).
 
-## Uso
-1. Menú ☰ → **Roles** → crea al menos un rol (ej. Administrador, Encargado, Estudiante).
-2. Menú ☰ → **Usuarios** → crea usuarios asignándoles un rol.
+Ajusta el puerto a tu instalación. En producción usa HTTPS y `APP_ENV=production`: las solicitudes HTTP se rechazan. No se confía automáticamente en cabeceras de proxy. Apache necesita `mod_rewrite`, `AllowOverride All` y aplicar los `.htaccess` para impedir acceso a configuración, SQL y carpetas internas. Otro servidor necesita restricciones equivalentes.
 
 ## Estructura
-```
-MedLab/
-├── index.php, roles.php, usuarios.php     páginas
-├── includes/                              encabezado/pie compartidos (menú hamburguesa)
-├── api/
-│   ├── admin/   C_Roles, C_Usuarios, C_Conexion      controladores (GET/POST/PUT/DELETE)
-│   ├── models/  M_Roles, M_Usuarios, M_Conexion      consultas SQL con PDO preparado
-│   └── core/    .env, Env, Configuration, Connection, Response
-├── css/styles.css
-├── js/lib/      app.js (común), inicio.js, roles.js, usuarios.js
-├── database/    MedLabDB.sql, usuario_mysql.sql
-└── assets/
+
+- `index.php`, `login.php`, `usuarios.php`, `roles.php`: acceso y administración.
+- `categorias.php`, `estados_equipo.php`, `condiciones_equipo.php`, `equipos.php`: flujo ordenado del inventario.
+- `api/admin/`: controladores públicos con autenticación, permisos, CSRF y métodos permitidos.
+- `api/core/`: entorno, conexión, sesión, contraseñas, límites y validación HTTP; sin acceso web directo.
+- `api/models/`: consultas preparadas y reglas de negocio; sin acceso web directo.
+- `database/`: esquema, migración, permisos y creación CLI del administrador; sin acceso web directo.
+- `js/lib/`: interfaz y solicitudes con token CSRF.
+- `tests/`: pruebas de contraseñas e integración aislada; sin acceso web directo.
+- `docs/SEGURIDAD.md`: explicación de medidas, verificación y pendientes.
+- `docs/DEFENSA_ORAL.md`: exposición y respuestas a preguntas.
+
+## Comprobaciones
+
+```powershell
+C:\xampp\php\php.exe tests/passwords.php
 ```
 
-## Agregar un módulo nuevo
-1. Crear `C_Modulo.php` y `M_Modulo.php` copiando el patrón de Roles.
-2. Crear `modulo.php` y `js/lib/modulo.js` copiando `roles.php` / `roles.js`.
-3. En `includes/layout_inicio.php` cambiar `'archivo' => null` por `'modulo.php'`.
+Las suites `tests/security_http.php` y `tests/throttle.php` requieren una BD desechable; sus controles impiden usar la base normal del proyecto. Consulta `docs/SEGURIDAD.md` para conocer puertos y variables de pruebas. No guardes contraseñas ni respaldos en archivos públicos o en el repositorio.
+
+## Agregar un módulo
+
+Cada página debe llamar `Auth::proteger()`; cada API debe exigir autenticación y los permisos adecuados, métodos explícitos y CSRF para escrituras. Valida la entrada con `Request::form()` y en el modelo, usa PDO preparado y escapa la salida. Para recursos propios de cada usuario, comprueba también la propiedad: el login por sí solo no autoriza cualquier registro.
+
+## Flujo para registrar equipos
+
+1. Crea las categorías.
+2. Crea los estados de equipo.
+3. Crea las condiciones de equipo.
+4. Abre Equipos y selecciona los tres catálogos anteriores.
+5. Escribe la marca; si no existe, el servidor la crea y la relaciona dentro de la misma transacción.
+
+Una categoría inactiva no puede asignarse y una clasificación utilizada no puede eliminarse. No hay una pantalla CRUD independiente para marcas.
+
+## Pendiente antes de publicar
+
+Actualizar el PHP instalado (8.0.30, sin soporte de seguridad) y los demás componentes de XAMPP, habilitar HTTPS, restringir MySQL/phpMyAdmin y preparar monitoreo y respaldos con restauración probada. Los controles incorporados no garantizan inmunidad frente a ataques.
