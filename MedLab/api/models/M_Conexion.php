@@ -2,7 +2,7 @@
 
 /**
  * Modelo de prueba: verifica que PHP se conecta a MedLabDB
- * y que existen las 9 tablas del diseño.
+ * y que existen las tablas del diseño.
  */
 class M_Conexion
 {
@@ -20,6 +20,7 @@ class M_Conexion
         'equipos',
         'prestamos',
         'detalle_prestamo',
+        'notificaciones',
     ];
 
     public function __construct(Connection $connection, Response $response)

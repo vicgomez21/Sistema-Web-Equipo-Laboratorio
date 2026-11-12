@@ -6,7 +6,14 @@ boton.addEventListener('click', () => {
     boton.textContent = visible ? 'Ocultar' : 'Mostrar';
     boton.setAttribute('aria-pressed', String(visible));
 });
-document.querySelector('.login-form').addEventListener('submit', () => {
-    const submit = document.querySelector('.login-submit');
-    submit.disabled = true; submit.textContent = 'Ingresando…';
+
+const form = document.querySelector('.login-form');
+const submit = document.querySelector('.login-submit');
+form.addEventListener('submit', () => {
+    submit.disabled = true;
+    submit.textContent = 'Ingresando…';
+});
+window.addEventListener('pageshow', () => {
+    submit.disabled = false;
+    submit.innerHTML = 'Iniciar sesión <span aria-hidden="true">→</span>';
 });

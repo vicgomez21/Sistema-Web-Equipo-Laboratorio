@@ -36,4 +36,5 @@ async function verificarConexion() {
     }
 }
 
-verificarConexion();
+const diagnostico = document.querySelector('.connection-details');
+diagnostico?.addEventListener('toggle', () => { if (diagnostico.open) verificarConexion(); }, { once: true });

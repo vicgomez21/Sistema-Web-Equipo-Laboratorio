@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../core/Auth.php';
+Auth::proteger(true, true);
 require_once(__DIR__ . "/../core/Connection.php");
 require_once(__DIR__ . "/../models/M_Roles.php");
 require_once(__DIR__ . "/../core/Response.php");

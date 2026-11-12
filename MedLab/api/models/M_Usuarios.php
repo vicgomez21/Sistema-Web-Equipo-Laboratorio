@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../core/AdminGuard.php';
 
 /**
  * Modelo de la tabla usuarios (CRUD).
@@ -46,7 +47,6 @@ class M_Usuarios
     {
         $idUsuario = $this->OBTENER_ID($arrayData['id_usuario'] ?? null);
         $datos = $this->VALIDAR_DATOS($arrayData, false);
-        $this->VERIFICAR_QUE_EXISTE($idUsuario);
 
         // La contraseña solo se cambia si se envió una nueva
         $campos = "codigo_usuario = :codigo_usuario, nombres = :nombres, apellidos = :apellidos,
@@ -59,9 +59,14 @@ class M_Usuarios
 
         $query = "UPDATE usuarios SET $campos WHERE id_usuario = :id_usuario";
         try {
+            $rolesBloqueados = AdminGuard::begin($this->connection);
+            $this->VERIFICAR_QUE_EXISTE($idUsuario);
+            AdminGuard::user($this->connection, $rolesBloqueados, $idUsuario, (int)$datos['id_rol'], (int)$datos['activo']);
             $statement = $this->connection->prepare($query);
             $statement->execute($datos + ['id_usuario' => $idUsuario]);
+            $this->connection->commit();
         } catch (PDOException $e) {
+            if ($this->connection->inTransaction()) $this->connection->rollBack();
             $this->RESPONDER_ERROR_BD($e);
         }
         $this->response->success("Usuario actualizado correctamente", [], 1);
@@ -70,13 +75,17 @@ class M_Usuarios
     function DELETE_USUARIO($valorId)
     {
         $idUsuario = $this->OBTENER_ID($valorId);
-        $this->VERIFICAR_QUE_EXISTE($idUsuario);
 
         $query = "DELETE FROM usuarios WHERE id_usuario = :id_usuario";
         try {
+            $rolesBloqueados = AdminGuard::begin($this->connection);
+            $this->VERIFICAR_QUE_EXISTE($idUsuario);
+            AdminGuard::user($this->connection, $rolesBloqueados, $idUsuario, null, 0);
             $statement = $this->connection->prepare($query);
             $statement->execute(['id_usuario' => $idUsuario]);
+            $this->connection->commit();
         } catch (PDOException $e) {
+            if ($this->connection->inTransaction()) $this->connection->rollBack();
             $this->RESPONDER_ERROR_BD($e);
         }
         $this->response->success("Usuario eliminado correctamente", [], 1);

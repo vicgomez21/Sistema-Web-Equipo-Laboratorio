@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../core/AdminGuard.php';
 
 /**
  * Modelo de la tabla roles (CRUD).
@@ -44,13 +45,17 @@ class M_Roles
     {
         $idRol = $this->OBTENER_ID($arrayData['id_rol'] ?? null);
         $datos = $this->VALIDAR_DATOS($arrayData);
-        $this->VERIFICAR_QUE_EXISTE($idRol);
 
         $query = "UPDATE roles SET nombre = :nombre, descripcion = :descripcion WHERE id_rol = :id_rol";
         try {
+            $rolesBloqueados = AdminGuard::begin($this->connection);
+            $this->VERIFICAR_QUE_EXISTE($idRol);
+            AdminGuard::role($this->connection, $rolesBloqueados, $idRol, $datos['nombre']);
             $statement = $this->connection->prepare($query);
             $statement->execute($datos + ['id_rol' => $idRol]);
+            $this->connection->commit();
         } catch (PDOException $e) {
+            if ($this->connection->inTransaction()) $this->connection->rollBack();
             $this->RESPONDER_ERROR_BD($e);
         }
         $this->response->success("Rol actualizado correctamente", [], 1);
@@ -59,13 +64,17 @@ class M_Roles
     function DELETE_ROL($valorId)
     {
         $idRol = $this->OBTENER_ID($valorId);
-        $this->VERIFICAR_QUE_EXISTE($idRol);
 
         $query = "DELETE FROM roles WHERE id_rol = :id_rol";
         try {
+            $rolesBloqueados = AdminGuard::begin($this->connection);
+            $this->VERIFICAR_QUE_EXISTE($idRol);
+            AdminGuard::role($this->connection, $rolesBloqueados, $idRol, null);
             $statement = $this->connection->prepare($query);
             $statement->execute(['id_rol' => $idRol]);
+            $this->connection->commit();
         } catch (PDOException $e) {
+            if ($this->connection->inTransaction()) $this->connection->rollBack();
             $this->RESPONDER_ERROR_BD($e);
         }
         $this->response->success("Rol eliminado correctamente", [], 1);
