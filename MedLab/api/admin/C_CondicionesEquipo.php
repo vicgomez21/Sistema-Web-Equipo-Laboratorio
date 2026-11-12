@@ -1,3 +1,3 @@
 <?php
-$tipoCatalogo = 'condiciones';
-require __DIR__ . '/C_CatalogoEquipo.php';
+$_GET['tipo'] = 'condiciones';
+require __DIR__ . '/C_Catalogos.php';

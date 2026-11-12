@@ -61,11 +61,13 @@ body {
     position: fixed; top: 0; left: 0; bottom: 0; z-index: 40;
     width: min(290px, 85vw);
     display: flex; flex-direction: column;
+    overflow-y: auto;
     background: #fff;
     box-shadow: 4px 0 16px rgba(0, 0, 0, .2);
     transform: translateX(-100%); visibility: hidden;
     transition: transform .25s, visibility .25s;
 }
+.drawer > * { flex-shrink: 0; }
 .drawer.abierto { transform: translateX(0); visibility: visible; }
 
 .drawer__cabecera {
@@ -74,7 +76,7 @@ body {
     padding: 1rem 1.25rem; font-size: 1.3rem; font-weight: 700;
 }
 .drawer__logo { font-size: 1.5rem; }
-.drawer__nav { overflow-y: auto; padding: .5rem 0; }
+.drawer__nav { overflow: visible; padding: .5rem 0; }
 
 .nav-link {
     display: flex; justify-content: space-between; align-items: center;
@@ -185,7 +187,6 @@ dialog::backdrop { background: rgba(15, 23, 42, .5); }
     background: var(--color-error-fondo); color: var(--color-error);
     padding: .6rem .8rem; border-radius: 8px; font-size: .9rem;
 }
-.form-help { color: var(--color-texto-suave); font-size: .8rem; }
 
 /* ---------- Tarjeta de conexión (Inicio) ---------- */
 .info { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1rem 0; }
@@ -234,7 +235,7 @@ dialog::backdrop { background: rgba(15, 23, 42, .5); }
     --color-borde: #dce9e6;
 }
 body { min-height: 100vh; }
-.brand { display: inline-flex; align-items: center; gap: .7rem; color: inherit; text-decoration: none; font-size: 1.8rem; font-weight: 700; letter-spacing: -.05em; }
+.brand { display: inline-flex; align-items: center; gap: .7rem; color: inherit; text-decoration: none; font-size: 1.8rem; font-weight: 700; letter-spacing: -.035em; }
 .brand img { flex-shrink: 0; }
 .brand small { display: block; font-size: .58rem; font-weight: 500; letter-spacing: .16em; color: #b6e9e3; }
 .topbar { min-height: 84px; background: #073c40; padding: 1rem 2rem; box-shadow: 0 3px 16px #073c4012; }
@@ -269,41 +270,28 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--color-marca); o
 .campo input, .campo select, .campo textarea, .buscador { background: #fbfdfc; color: var(--color-texto); min-height: 44px; }
 .campo--check input { min-height: auto; accent-color: var(--color-primario); }
 .login-page { background: #fff; }
-.login-shell { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; }
-.login-story { display: flex; flex-direction: column; justify-content: space-between; padding: 2.5rem clamp(2rem, 5vw, 5rem); background: #073c40; color: #fff; overflow: hidden; }
-.login-story > div { padding-top: 3rem; }
-.login-story .eyebrow { color: var(--color-menta); }
-.login-story h1 { font-size: clamp(2.3rem, 3.7vw, 3.8rem); line-height: 1.12; letter-spacing: -.045em; margin: 1rem 0 1.4rem; }
-.login-story p { color: #c1dcd8; max-width: 390px; font-size: 1rem; }
-.login-story > small { color: #b2d3ce; font-size: .8rem; margin-top: 1rem; }
-.lab-art { position: relative; height: 235px; display: flex; justify-content: center; align-items: center; margin-top: 1rem; }
-.lab-symbol { width: 150px; height: 150px; z-index: 1; }
-.orbit { position: absolute; border: 1px solid #ffffff18; border-radius: 50%; width: 210px; height: 210px; }
-.orbit-two { width: 290px; height: 290px; }
-.art-tag { position: absolute; bottom: 2px; padding: .55rem 1rem; border: 1px solid #ffffff25; border-radius: 30px; background: #10494b; color: #c8eee4; font-size: .75rem; }
-.login-panel { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 3rem; position: relative; }
-.login-form-wrap { width: 100%; max-width: 390px; margin: auto 0; }
-.login-form-wrap h2 { font-size: 2.25rem; letter-spacing: -.04em; margin: .65rem 0; color: #073c40; }
-.login-description { color: var(--color-texto-suave); margin-bottom: 2rem; }
+.login-shell { min-height: 100vh; min-height: 100svh; display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
+.login-story { display: flex; flex-direction: column; justify-content: space-between; gap: 3rem; padding: clamp(2rem, 5vw, 5rem); background: #073c40; color: #fff; }
+.login-story h1 { max-width: 14ch; font-size: clamp(2rem, 3vw, 3rem); font-weight: 600; line-height: 1.2; letter-spacing: -.035em; margin-bottom: 1.25rem; text-wrap: balance; }
+.login-story p { color: #c1dcd8; font-size: 1rem; }
+.login-panel { display: flex; align-items: center; justify-content: center; padding: clamp(2rem, 5vw, 5rem); min-width: 0; }
+.login-form-wrap { width: 100%; max-width: 410px; }
+.login-form-wrap h2 { font-size: 2rem; letter-spacing: -.03em; margin-bottom: .75rem; color: #073c40; }
+.login-description { color: #536b6b; margin-bottom: 2rem; }
 .login-form { display: grid; gap: 1.3rem; }
 .login-form .campo { gap: .5rem; }
-.login-form input { width: 100%; min-width: 0; padding: .85rem; }
+.login-form input { width: 100%; min-width: 0; padding: .85rem; min-height: 52px; }
 .password-wrap { display: flex; align-items: center; position: relative; }
-.password-wrap input { padding-right: 5rem; }
-.password-wrap button { position: absolute; right: .75rem; background: transparent; border: 0; color: var(--color-primario); font: inherit; font-size: .8rem; font-weight: 600; cursor: pointer; }
-.login-submit { display: flex; justify-content: space-between; align-items: center; padding: .9rem 1.1rem; margin-top: .4rem; }
-.login-help { font-size: .82rem; color: var(--color-texto-suave); margin-top: 1.5rem; }
-.login-security { border-top: 1px solid var(--color-borde); margin-top: 2rem; padding-top: 1rem; text-align: center; font-size: .73rem; color: var(--color-texto-suave); }
-.login-footer { padding-top: 2rem; text-align: center; color: var(--color-texto-suave); font-size: .7rem; }
+.password-wrap input { padding-right: 5.5rem; }
+.password-wrap button { position: absolute; right: .25rem; min-height: 44px; min-width: 64px; background: transparent; border: 0; color: #007e8c; font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; }
+.login-submit { display: flex; justify-content: space-between; align-items: center; min-height: 52px; padding: .9rem 1.1rem; margin-top: .4rem; }
+.login-help { font-size: .9rem; color: #536b6b; margin-top: 1.5rem; line-height: 1.6; }
 .login-form-wrap > .form-error { margin-bottom: 1rem; }
 @media (max-width: 800px) {
     .login-shell { grid-template-columns: 1fr; }
-    .login-story { padding: 1.75rem; }
-    .login-story > div { padding-top: 1.5rem; }
-    .login-story h1 { font-size: 2.3rem; }
-    .lab-art, .login-story > small { display: none; }
-    .login-story p { max-width: 100%; }
-    .login-panel { padding: 2.5rem 1.5rem; }
+    .login-story { padding: 1.5rem; gap: 1.75rem; }
+    .login-story h1 { max-width: 24ch; font-size: 1.65rem; margin-bottom: .5rem; }
+    .login-panel { padding: 2rem 1.5rem; align-items: start; }
     .topbar__description { display: none; }
 }
 @media (max-width: 600px) {
@@ -334,63 +322,37 @@ html { scroll-behavior: smooth; scroll-padding-top: 110px; }
 .badge { border-radius: 0; padding: .15rem 0; background: transparent; }
 .badge::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: currentColor; margin-right: .45rem; vertical-align: middle; }
 .card, .btn, dialog, .buscador, .campo input, .campo select, .campo textarea { border-radius: 4px; }
-.catalog-hero { display: grid; grid-template-columns: 1fr; border-bottom: 1px solid var(--color-borde); padding-bottom: 2.5rem; gap: 3rem; align-items: center; }
-.catalog-hero h1 { font-size: clamp(2.3rem, 4.3vw, 3.6rem); font-weight: 650; line-height: 1.08; letter-spacing: -.045em; color: #073c40; margin: 1.15rem 0; }
-.catalog-hero p { max-width: 510px; color: var(--color-texto-suave); margin-bottom: 1.7rem; }
-.catalog-hero .btn span { margin-left: 1.5rem; }
-.catalog-section { padding: 1rem 0; }
-.catalog-heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; }
-.catalog-heading h2 { font-size: 1.8rem; letter-spacing: -.035em; color: #073c40; margin-top: .4rem; }
-.catalog-heading > p { font-size: .85rem; color: var(--color-texto-suave); }
-.catalog-toolbar { display: flex; align-items: end; justify-content: space-between; gap: 1rem; padding: 1.5rem 0; }
-.catalog-toolbar label { display: grid; gap: .4rem; font-size: .8rem; font-weight: 600; width: min(100%, 440px); }
-.catalog-toolbar input { background: white; border: 1px solid #c1d4ce; padding: .8rem 1rem; font: inherit; width: 100%; border-radius: 2px; }
-.catalog-toolbar input:focus-visible { outline: 2px solid var(--color-primario); outline-offset: 2px; }
-#catalogCount { white-space: nowrap; font-size: .8rem; color: var(--color-texto-suave); padding-bottom: .8rem; }
-.catalog-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 1.1rem; }
-.equipment-category { text-align: left; font: inherit; cursor: pointer; border: 1px solid var(--color-borde); background: white; color: #073c40; transition: transform .2s,border-color .2s,box-shadow .2s; min-width: 0; }
-.equipment-category:hover { transform: translateY(-5px); border-color: var(--color-marca); box-shadow: 0 12px 24px #073c4010; }
-.equipment-category__art { height: 205px; background: #eaf1ed; display: flex; align-items: center; justify-content: center; position: relative; border-bottom: 1px solid var(--color-borde); }
-.equipment-category:nth-child(even) .equipment-category__art { background: #e1efed; }
-.equipment-category__art svg { width: 130px; height: 145px; transition: transform .3s; }
-.equipment-category:hover svg { transform: scale(1.08); }
-.equipment-category__art > span { position: absolute; bottom: .7rem; left: .85rem; color: #55746e; font-size: .52rem; letter-spacing: .1em; }
-.equipment-category__body { display: grid; gap: .6rem; padding: 1.1rem; }
-.equipment-category strong { display: flex; justify-content: space-between; gap: .4rem; font-size: 1rem; }
-.equipment-category__body > span { color: var(--color-texto-suave); font-size: .82rem; }
-.equipment-category__body .equipment-category__action { color: var(--color-primario); font-weight: 600; margin-top: .6rem; }
-.catalog-note { color: var(--color-texto-suave); font-size: .75rem; margin-top: 1.1rem; }
-.catalog-empty { padding: 2rem; background: white; border: 1px solid var(--color-borde); }
-.catalog-management { border-top: 1px solid var(--color-borde); border-bottom: 1px solid var(--color-borde); padding: 2rem 0; display: flex; justify-content: space-between; gap: 1.5rem; align-items: center; }
-.catalog-management h2 { font-size: 1.15rem; font-weight: 600; margin-top: .5rem; max-width: 380px; }
-.catalog-management .accesos { margin: 0; }
-.connection-details { font-size: .8rem; color: var(--color-texto-suave); }
-.connection-details summary { cursor: pointer; padding: .7rem 0; }
-.connection-details .card { margin-top: .7rem; }
-@media(max-width: 1000px) { .catalog-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .catalog-hero { gap: 1.5rem; } .catalog-management { align-items: start; flex-direction: column; } }
-@media(max-width: 600px) { .catalog-hero { grid-template-columns: 1fr; gap: 1.5rem; } .catalog-heading { display: block; } .catalog-heading > p { margin-top: .5rem; } .catalog-grid { gap: .7rem; } .equipment-category__body { padding: .8rem; } .equipment-category__art { height: 160px; } .equipment-category strong { font-size: .88rem; } .equipment-category__art > span { font-size: .43rem; left: .4rem; } }
-@media(max-width: 370px) { .catalog-grid { grid-template-columns: 1fr; } }
-
-/* Acceso con la misma identidad del catálogo técnico. */
-.login-page { background: #f3f8f7; }
-.login-shell { grid-template-columns: 1.08fr 1fr; }
-.login-story { background-color: #073c40; background-image: linear-gradient(#ffffff05 1px,transparent 1px),linear-gradient(90deg,#ffffff05 1px,transparent 1px); background-size: 36px 36px; padding: 2.5rem clamp(2rem,5vw,5rem); }
-.login-story .brand { font-size: 1.7rem; letter-spacing: -.04em; }
-.login-story h1 { font-weight: 600; font-size: clamp(2.4rem,3.8vw,3.9rem); }
-.login-story > small { border-top: 1px solid #ffffff25; padding-top: 1.25rem; }
-.login-panel { background: #fff; border-left: 1px solid var(--color-borde); padding: 3.5rem; }
-.login-form-wrap { max-width: 410px; }
-.login-form-wrap h2 { font-weight: 600; font-size: 2.5rem; }
-.login-form .campo input { background: #f7faf9; border-radius: 2px; border-color: #c1d4ce; min-height: 52px; }
-.login-submit { border-radius: 2px; box-shadow: none; min-height: 52px; }
-.login-security { text-align: left; border-top: 1px solid var(--color-borde); padding-top: 1.25rem; }
-.login-security::before { content: ''; display: inline-block; width: 6px; height: 6px; background: var(--color-primario); margin-right: .5rem; vertical-align: middle; }
-.lab-art { height: 220px; justify-content: flex-start; border-top: 1px solid #ffffff20; margin-top: 2rem; padding-top: 1rem; }
-.lab-art .orbit { display: none; }
-.lab-art .lab-symbol { width: 155px; height: 155px; transition: transform .3s; }
-.lab-art:hover .lab-symbol { transform: rotate(-6deg); }
-.lab-art .art-tag { position: static; background: none; border: 0; border-left: 1px solid #ffffff30; border-radius: 0; margin-left: 1.5rem; padding: 1rem 1.5rem; max-width: 170px; font-size: .85rem; }
-@media(max-width:800px) { .login-shell { grid-template-columns: 1fr; } .login-story { padding: 1.75rem; } .login-story h1 { font-size: 2.2rem; } .login-panel { border-left: 0; padding: 2.5rem 1.5rem; } .login-form-wrap h2 { font-size: 2rem; } }
+.home-heading { padding-bottom: 1.5rem; border-bottom: 1px solid var(--color-borde); }
+.home-heading h1 { color: #073c40; font-size: clamp(1.7rem, 3vw, 2.3rem); line-height: 1.2; letter-spacing: -.03em; }
+.home-heading p { color: #536b6b; max-width: 65ch; margin-top: .75rem; }
+.home-management h2, .catalog-section h2 { color: #073c40; font-size: 1.25rem; margin-bottom: .75rem; }
+.management-links { display: flex; flex-direction: column; border-top: 1px solid var(--color-borde); }
+.management-links a { display: grid; grid-template-columns: minmax(180px, 1fr) 2fr; gap: 1.5rem; padding: 1.15rem 0; border-bottom: 1px solid var(--color-borde); color: #007e8c; text-decoration: none; }
+.management-links a:hover strong { text-decoration: underline; text-underline-offset: .2em; }
+.management-links span { color: #536b6b; }
+.catalog-section { padding: .5rem 0; }
+.catalog-note { color: #536b6b; max-width: 65ch; line-height: 1.6; }
+.catalog-toolbar { display: flex; align-items: end; justify-content: space-between; gap: 1rem; padding: 1.25rem 0; flex-wrap: wrap; }
+.catalog-toolbar label { display: grid; gap: .5rem; font-size: .9rem; font-weight: 600; width: min(100%, 440px); }
+.catalog-toolbar input { background: white; border: 1px solid #8aa6a0; padding: .8rem 1rem; font: inherit; width: 100%; min-height: 44px; border-radius: 4px; }
+.catalog-toolbar input:focus-visible { outline: 2px solid #007e8c; outline-offset: 2px; }
+#catalogCount { white-space: nowrap; font-size: .9rem; color: #536b6b; padding-bottom: .8rem; }
+.category-list { list-style: none; border-top: 1px solid var(--color-borde); }
+.category-list li { display: grid; grid-template-columns: minmax(180px, 1fr) 2fr; gap: 1.5rem; border-bottom: 1px solid var(--color-borde); padding: 1.1rem 0; }
+.category-list h3 { color: #073c40; font-size: 1rem; font-weight: 600; }
+.category-list p { color: #536b6b; }
+.catalog-empty { padding: 1rem 0; color: #536b6b; }
+.connection-details { color: #536b6b; font-size: .9rem; border-top: 1px solid var(--color-borde); }
+.connection-details summary { cursor: pointer; padding: 1rem 0; }
+.connection-details .card { margin-top: .5rem; }
+.drawer-pending { margin: 0 1.2rem 1.25rem; padding-top: 1rem; border-top: 1px solid var(--color-borde); color: #536b6b; font-size: .9rem; }
+.drawer-pending summary { cursor: pointer; min-height: 44px; padding: .65rem 0; }
+.drawer-pending p { margin: .5rem 0; }
+.drawer-pending ul { padding-left: 1.2rem; line-height: 1.9; }
+.drawer > form { margin: 0 1.2rem 1.5rem; }
+@media (max-width: 600px) {
+    .management-links a, .category-list li { grid-template-columns: 1fr; gap: .4rem; }
+}
 
 /* LineSidebar / React Bits, adapté à la navigation MedLab. */
 .drawer .line-sidebar { padding: 1rem .9rem 1.5rem 1.2rem; }

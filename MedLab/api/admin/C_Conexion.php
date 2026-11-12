@@ -1,8 +1,6 @@
 <?php
 require_once __DIR__ . '/../core/Auth.php';
-require_once __DIR__ . '/../core/Request.php';
-Auth::administrador(true);
-Request::metodos(['GET']);
+Auth::proteger(true, true);
 require_once(__DIR__ . "/../core/Connection.php");
 require_once(__DIR__ . "/../models/M_Conexion.php");
 require_once(__DIR__ . "/../core/Response.php");
@@ -18,7 +16,7 @@ switch ($method) {
             $modelo->VERIFICAR_CONEXION();
         } catch (\Throwable $th) {
             error_log("[MedLab] C_Conexion: " . $th->getMessage());
-            $response->error("Error al verificar la conexión", 2001, 500);
+            $response->error("Error al verificar la conexión", 2001, 400);
         }
         break;
     default:

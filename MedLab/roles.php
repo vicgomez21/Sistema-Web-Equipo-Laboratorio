@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/api/core/Auth.php';
-Auth::administrador();
+Auth::proteger(false, true);
 $tituloPagina = 'Roles';
 $paginaActiva = 'roles';
 $scriptPagina = 'roles.js';

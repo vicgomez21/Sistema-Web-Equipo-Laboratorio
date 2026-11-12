@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/api/core/Auth.php';
-Auth::administrador();
+Auth::proteger(false, true);
 $tituloPagina = 'Usuarios';
 $paginaActiva = 'usuarios';
 $scriptPagina = 'usuarios.js';
@@ -71,8 +71,7 @@ require_once __DIR__ . '/includes/layout_inicio.php';
                 </div>
                 <div class="campo campo--completo">
                     <label for="usuarioPassword" id="etiquetaPassword">Contraseña *</label>
-                    <input id="usuarioPassword" type="password" minlength="15" maxlength="72" autocomplete="new-password" aria-describedby="passwordAyuda">
-                    <small id="passwordAyuda">Al menos 15 caracteres, hasta 72 bytes. Las letras con tilde pueden ocupar más de un byte.</small>
+                    <input id="usuarioPassword" type="password" minlength="8" autocomplete="new-password">
                 </div>
                 <div class="campo campo--check campo--completo">
                     <input id="usuarioActivo" type="checkbox" checked>

@@ -1,0 +1,15 @@
+.page-header h1 { color:#073c40; font-size:clamp(1.6rem,3vw,2rem); line-height:1.2; letter-spacing:-.025em; }
+.inventory-toolbar { display:grid; grid-template-columns:minmax(0,2fr) minmax(160px,1fr); gap:1rem; margin:1rem 0; }
+.inventory-toolbar .campo { min-width:0; }
+.inventory-toolbar input,.inventory-toolbar select { width:100%; min-height:44px; }
+.inventory-secondary { display:block; color:#536b6b; font-size:.875rem; margin-top:.25rem; }
+.inventory-tabs { display:flex; gap:.6rem 1.5rem; flex-wrap:wrap; border-bottom:1px solid var(--color-borde); padding-bottom:.75rem; }
+.inventory-tabs a { color:#007e8c; padding:.6rem 0; text-underline-offset:.3em; }
+.inventory-tabs [aria-current="page"] { font-weight:700; }
+.tabla-contenedor:focus-visible { outline:2px solid #007e8c; outline-offset:4px; }
+.tabla-acciones .btn { min-height:40px; }
+.dialogo__cuerpo > p { margin-bottom:1rem; }
+.dialogo__cuerpo > .campo { margin-bottom:1rem; }
+#inventarioEstado,#catalogoEstado { margin:.75rem 0; color:#536b6b; }
+#inventarioError,#catalogoError { margin:.75rem 0; color:#9b2020; }
+@media(max-width:600px) { .inventory-toolbar { grid-template-columns:1fr; } .page-header { align-items:flex-start; gap:1rem; } .tabla-acciones { white-space:nowrap; } }

@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../core/AdminGuard.php';
 
 /**
  * Modelo de la tabla roles (CRUD).
@@ -44,16 +45,17 @@ class M_Roles
     {
         $idRol = $this->OBTENER_ID($arrayData['id_rol'] ?? null);
         $datos = $this->VALIDAR_DATOS($arrayData);
-        $actual = $this->VERIFICAR_QUE_EXISTE($idRol);
-        if ((bool) $actual['es_administrador'] && $actual['nombre'] !== $datos['nombre']) {
-            $this->response->error('El nombre del rol administrador está protegido.', 3008, 409);
-        }
 
         $query = "UPDATE roles SET nombre = :nombre, descripcion = :descripcion WHERE id_rol = :id_rol";
         try {
+            $rolesBloqueados = AdminGuard::begin($this->connection);
+            $this->VERIFICAR_QUE_EXISTE($idRol);
+            AdminGuard::role($this->connection, $rolesBloqueados, $idRol, $datos['nombre']);
             $statement = $this->connection->prepare($query);
             $statement->execute($datos + ['id_rol' => $idRol]);
+            $this->connection->commit();
         } catch (PDOException $e) {
+            if ($this->connection->inTransaction()) $this->connection->rollBack();
             $this->RESPONDER_ERROR_BD($e);
         }
         $this->response->success("Rol actualizado correctamente", [], 1);
@@ -62,16 +64,17 @@ class M_Roles
     function DELETE_ROL($valorId)
     {
         $idRol = $this->OBTENER_ID($valorId);
-        $actual = $this->VERIFICAR_QUE_EXISTE($idRol);
-        if ((bool) $actual['es_administrador']) {
-            $this->response->error('El rol administrador no se puede eliminar.', 3009, 409);
-        }
 
         $query = "DELETE FROM roles WHERE id_rol = :id_rol";
         try {
+            $rolesBloqueados = AdminGuard::begin($this->connection);
+            $this->VERIFICAR_QUE_EXISTE($idRol);
+            AdminGuard::role($this->connection, $rolesBloqueados, $idRol, null);
             $statement = $this->connection->prepare($query);
             $statement->execute(['id_rol' => $idRol]);
+            $this->connection->commit();
         } catch (PDOException $e) {
+            if ($this->connection->inTransaction()) $this->connection->rollBack();
             $this->RESPONDER_ERROR_BD($e);
         }
         $this->response->success("Rol eliminado correctamente", [], 1);
@@ -81,14 +84,6 @@ class M_Roles
 
     private function VALIDAR_DATOS(array $arrayData): array
     {
-        foreach (['nombre', 'descripcion'] as $campo) {
-            if (isset($arrayData[$campo]) && !is_string($arrayData[$campo])) {
-                $this->response->error('Los campos deben contener un solo valor de texto.', 3010, 422);
-            }
-            if (isset($arrayData[$campo]) && (!mb_check_encoding($arrayData[$campo], 'UTF-8') || strpos($arrayData[$campo], "\0") !== false)) {
-                $this->response->error('Los campos contienen caracteres no válidos.', 3010, 422);
-            }
-        }
         $nombre = trim($arrayData['nombre'] ?? '');
         $descripcion = trim($arrayData['descripcion'] ?? '');
 
@@ -110,9 +105,6 @@ class M_Roles
 
     private function OBTENER_ID($valor): int
     {
-        if (!is_int($valor) && !is_string($valor)) {
-            $this->response->error("Identificador de rol no válido", 3004, 422);
-        }
         $id = filter_var($valor, FILTER_VALIDATE_INT);
         if ($id === false || $id < 1) {
             $this->response->error("Identificador de rol no válido", 3004, 422);
@@ -120,15 +112,13 @@ class M_Roles
         return $id;
     }
 
-    private function VERIFICAR_QUE_EXISTE(int $idRol): array
+    private function VERIFICAR_QUE_EXISTE(int $idRol)
     {
-        $statement = $this->connection->prepare("SELECT nombre, es_administrador FROM roles WHERE id_rol = :id_rol");
+        $statement = $this->connection->prepare("SELECT 1 FROM roles WHERE id_rol = :id_rol");
         $statement->execute(['id_rol' => $idRol]);
-        $rol = $statement->fetch();
-        if (!$rol) {
+        if (!$statement->fetchColumn()) {
             $this->response->error("El rol no existe", 3005, 404);
         }
-        return $rol;
     }
 
     // Traduce los errores de MySQL más comunes a mensajes entendibles

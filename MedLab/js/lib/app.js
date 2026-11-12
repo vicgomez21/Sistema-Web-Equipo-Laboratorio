@@ -13,17 +13,15 @@ function escapeHtml(valor) {
 // PETICIÓN A LA API (GET, POST, PUT, DELETE). Lanza un Error con el mensaje del servidor si algo falla
 async function peticion(url, metodo = "GET", datos = null) {
     let opciones = { method: metodo, credentials: "same-origin", headers: {} };
-    if (metodo !== "GET") {
-        opciones.headers["X-CSRF-Token"] = document.querySelector('meta[name="csrf-token"]')?.content ?? "";
+    if (metodo.toUpperCase() !== "GET") {
+        const token = document.querySelector('meta[name="csrf-token"]')?.content;
+        if (!token) throw new Error("Recarga la página para continuar.");
+        opciones.headers["X-CSRF-Token"] = token;
     }
     if (datos !== null) {
         opciones.body = new URLSearchParams(datos);
     }
     let solicitud = await fetch(url, opciones);
-    if (solicitud.status === 401) {
-        window.location.assign("login.php");
-        throw new Error("Tu sesión terminó. Inicia sesión nuevamente.");
-    }
     let respuesta;
     try {
         respuesta = await solicitud.json();
@@ -58,6 +56,8 @@ function limpiarError(selector) {
 
 // ================= MENÚ HAMBURGUESA =================
 function abrirMenu() {
+    document.querySelector('main').inert = true;
+    document.querySelector('.topbar').inert = true;
     $("#menuLateral").classList.add("abierto");
     $("#overlay").classList.add("visible");
     $("#botonMenu").setAttribute("aria-expanded", "true");
@@ -66,6 +66,8 @@ function abrirMenu() {
 }
 
 function cerrarMenu() {
+    document.querySelector('main').inert = false;
+    document.querySelector('.topbar').inert = false;
     const estabaAbierto = $("#menuLateral").classList.contains("abierto");
     $("#menuLateral").classList.remove("abierto");
     $("#overlay").classList.remove("visible");
@@ -82,6 +84,12 @@ function configurarMenu() {
     $("#overlay").addEventListener("click", cerrarMenu);
     document.addEventListener("keydown", (evento) => {
         if (evento.key === "Escape") cerrarMenu();
+        if (evento.key === "Tab" && $("#menuLateral").classList.contains("abierto")) {
+            const focusable = [...$("#menuLateral").querySelectorAll('a[href],button,input,select,textarea,summary,[tabindex="0"]')].filter(el => el.getClientRects().length && !el.disabled && el.type !== 'hidden');
+            const first=focusable[0], last=focusable[focusable.length-1];
+            if(evento.shiftKey && document.activeElement===first){evento.preventDefault();last?.focus();}
+            else if(!evento.shiftKey && document.activeElement===last){evento.preventDefault();first?.focus();}
+        }
     });
 
     // Módulos que todavía no existen

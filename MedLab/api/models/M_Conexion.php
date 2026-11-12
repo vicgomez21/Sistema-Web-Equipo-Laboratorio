@@ -2,7 +2,7 @@
 
 /**
  * Modelo de prueba: verifica que PHP se conecta a MedLabDB
- * y que existen las 11 tablas del diseño.
+ * y que existen las tablas del diseño.
  */
 class M_Conexion
 {
@@ -13,15 +13,14 @@ class M_Conexion
     private const TABLAS_ESPERADAS = [
         'roles',
         'categorias',
-        'marcas',
         'estados_equipo',
         'condiciones_equipo',
         'estados_prestamo',
         'usuarios',
-        'intentos_login',
         'equipos',
         'prestamos',
         'detalle_prestamo',
+        'notificaciones',
     ];
 
     public function __construct(Connection $connection, Response $response)

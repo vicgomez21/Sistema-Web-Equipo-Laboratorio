@@ -1,58 +1,21 @@
 <?php
-require_once __DIR__ . '/api/core/Auth.php';
-Auth::administrador();
-$tituloPagina = 'Equipos';
-$paginaActiva = 'equipos';
-$scriptPagina = 'equipos.js';
-require_once __DIR__ . '/includes/layout_inicio.php';
+require_once __DIR__.'/api/core/Auth.php';Auth::proteger();
+$tituloPagina='Inventario';$paginaActiva='equipos';$scriptPagina='equipos.js';$estiloPagina='inventario.css';
+require_once __DIR__.'/includes/layout_inicio.php';
 ?>
-
-<div class="page-header">
-    <div>
-        <h2>Equipos</h2>
-        <p class="page-header__texto">Administra el inventario y relaciona cada equipo con su marca y clasificación.</p>
-    </div>
-    <button class="btn btn--primario" id="botonNuevo" type="button">+ Nuevo equipo</button>
-</div>
-
-<section class="card">
-    <input class="buscador" id="buscador" type="search"
-           placeholder="Buscar por código, equipo, marca, categoría o ubicación...">
-    <div class="tabla-contenedor">
-        <table class="tabla">
-            <thead><tr><th>Código</th><th>Equipo</th><th>Marca / modelo</th><th>Clasificación</th><th>Ubicación</th><th>Estado</th><th></th></tr></thead>
-            <tbody id="tablaEquipos"><tr><td colspan="7" class="tabla-vacia">Cargando...</td></tr></tbody>
-        </table>
-    </div>
+<header class="page-header"><div><h1>Inventario de instrumentos</h1><p class="page-header__texto">Consulta las existencias disponibles, reservadas y prestadas.</p></div>
+<?php if(Auth::esAdministrador()): ?><button class="btn btn--primario" type="button" id="nuevoEquipo">Registrar instrumento</button><?php else: ?><a class="btn btn--primario" href="prestamos.php">Solicitar préstamo</a><?php endif; ?></header>
+<?php if(Auth::esAdministrador()): ?><p><a href="catalogos.php">Configurar categorías, estados y condiciones</a>. Las unidades no utilizables se registran en «Fuera de servicio»; el estado y la condición describen el lote.</p><?php endif; ?>
+<section class="card" id="inventario" data-admin="<?= Auth::esAdministrador()?'1':'0' ?>" aria-labelledby="inventarioTitle">
+<h2 id="inventarioTitle">Existencias</h2><div class="inventory-toolbar"><div class="campo"><label for="buscarEquipo">Buscar por nombre, código o modelo</label><input type="search" id="buscarEquipo" autocomplete="off"></div><div class="campo"><label for="filtroCategoria">Categoría</label><select id="filtroCategoria"><option value="">Todas</option></select></div></div>
+<p id="inventarioEstado" role="status">Cargando inventario…</p><p id="inventarioError" role="alert" hidden></p><button class="btn btn--secundario" type="button" id="reintentarInventario" hidden>Volver a cargar</button>
+<div class="tabla-contenedor" role="region" aria-label="Existencias por instrumento; desplázate horizontalmente para ver todas las columnas" tabindex="0"><table class="tabla"><thead><tr><th scope="col">Instrumento</th><th scope="col">Categoría</th><th scope="col">Total</th><th scope="col">Fuera de servicio</th><th scope="col">Reservadas</th><th scope="col">Prestadas</th><th scope="col">Disponibles</th><th scope="col">Estado y condición</th><?php if(Auth::esAdministrador()): ?><th scope="col">Acciones</th><?php endif; ?></tr></thead><tbody id="tablaEquipos"><tr><td colspan="9">Cargando…</td></tr></tbody></table></div>
 </section>
-
-<dialog id="dialogoEquipo">
-    <form id="formEquipo" class="dialogo" autocomplete="off">
-        <div class="dialogo__cabecera"><h3 id="tituloDialogo">Nuevo equipo</h3></div>
-        <div class="dialogo__cuerpo">
-            <input type="hidden" id="equipoId">
-            <div class="form-grid">
-                <div class="campo"><label for="equipoCodigo">Código de inventario *</label><input id="equipoCodigo" maxlength="30" required></div>
-                <div class="campo"><label for="equipoNombre">Nombre *</label><input id="equipoNombre" maxlength="100" required></div>
-                <div class="campo"><label for="equipoMarca">Marca</label><input id="equipoMarca" maxlength="50" list="listaMarcas" placeholder="Ej. Thermo Fisher"><datalist id="listaMarcas"></datalist></div>
-                <div class="campo"><label for="equipoModelo">Modelo</label><input id="equipoModelo" maxlength="50"></div>
-                <div class="campo"><label for="equipoSerie">Número de serie</label><input id="equipoSerie" maxlength="80"></div>
-                <div class="campo"><label for="equipoCategoria">Categoría *</label><select id="equipoCategoria" required></select></div>
-                <div class="campo"><label for="equipoEstado">Estado *</label><select id="equipoEstado" required></select></div>
-                <div class="campo"><label for="equipoCondicion">Condición *</label><select id="equipoCondicion" required></select></div>
-                <div class="campo"><label for="equipoUbicacion">Ubicación</label><input id="equipoUbicacion" maxlength="100"></div>
-                <div class="campo"><label for="equipoFecha">Fecha de adquisición</label><input id="equipoFecha" type="date"></div>
-                <div class="campo campo--completo"><label for="equipoDescripcion">Descripción</label><textarea id="equipoDescripcion" maxlength="1000" rows="3"></textarea></div>
-                <div class="campo campo--check campo--completo"><input id="equipoActivo" type="checkbox" checked><label for="equipoActivo">Equipo activo</label></div>
-            </div>
-            <p class="form-help">Crea primero la categoría, el estado y la condición. Si escribes una marca nueva, se incorporará al guardar el equipo.</p>
-            <p class="form-error" id="equipoError" hidden></p>
-        </div>
-        <div class="dialogo__pie">
-            <button class="btn btn--secundario" id="botonCancelar" type="button">Cancelar</button>
-            <button class="btn btn--primario" type="submit">Guardar</button>
-        </div>
-    </form>
-</dialog>
-
-<?php require_once __DIR__ . '/includes/layout_fin.php'; ?>
+<?php if(Auth::esAdministrador()): ?>
+<dialog id="dialogoEquipo" aria-labelledby="equipoTitulo"><form id="formEquipo" class="dialogo"><div class="dialogo__cabecera"><h2 id="equipoTitulo">Registrar instrumento</h2></div><div class="dialogo__cuerpo"><p>Los campos con * son obligatorios. Un registro agrupa unidades del mismo instrumento.</p><input type="hidden" name="id_equipo"><div class="form-grid">
+<?php foreach([['codigo_inventario','Código de inventario',30],['nombre','Nombre del instrumento',100],['marca','Marca',50],['modelo','Modelo',50],['numero_serie','Número de serie (solo una unidad)',80],['ubicacion','Ubicación',100]] as [$name,$label,$max]): ?><div class="campo"><label for="equipo_<?= $name ?>"><?= $label ?><?= in_array($name,['codigo_inventario','nombre'],true)?' *':'' ?></label><input id="equipo_<?= $name ?>" name="<?= $name ?>" maxlength="<?= $max ?>" <?= in_array($name,['codigo_inventario','nombre'],true)?'required':'' ?>></div><?php endforeach; ?>
+<div class="campo"><label for="equipo_total">Cantidad total *</label><input id="equipo_total" name="cantidad_total" type="number" min="0" max="1000000" step="1" required></div><div class="campo"><label for="equipo_fuera">Fuera de servicio *</label><input id="equipo_fuera" name="cantidad_fuera_servicio" type="number" min="0" max="1000000" step="1" required></div>
+<?php foreach([['id_categoria','Categoría'],['id_estado','Estado del lote'],['id_condicion','Condición del lote']] as [$name,$label]): ?><div class="campo"><label for="equipo_<?= $name ?>"><?= $label ?> *</label><select id="equipo_<?= $name ?>" name="<?= $name ?>" required></select></div><?php endforeach; ?>
+<div class="campo"><label for="equipo_fecha">Fecha de adquisición</label><input id="equipo_fecha" type="date" name="fecha_adquisicion"></div><div class="campo campo--completo"><label for="equipo_descripcion">Descripción</label><textarea id="equipo_descripcion" name="descripcion" maxlength="3000" rows="3"></textarea></div><div class="campo campo--check"><label><input name="activo" type="checkbox" checked> Instrumento activo</label></div></div><p id="equipoError" class="form-error" role="alert" tabindex="-1" hidden></p></div><div class="dialogo__pie"><button class="btn btn--secundario" type="button" id="cancelarEquipo">Cancelar</button><button class="btn btn--primario" type="submit">Guardar instrumento</button></div></form></dialog>
+<?php endif; ?>
+<?php require_once __DIR__.'/includes/layout_fin.php'; ?>

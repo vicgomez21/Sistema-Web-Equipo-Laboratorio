@@ -1,80 +1,46 @@
-# MedLab — Gestión de equipos de laboratorio
+# MedLab — gestión de equipos de laboratorio
 
-PHP nativo + MySQL/MariaDB. Implementado: login, sesiones y CRUD administrativo de usuarios, roles, categorías, estados de equipo, condiciones de equipo y equipos. El inventario se configura en ese orden; la marca se captura dentro de Equipo. Los préstamos todavía están pendientes.
+Aplicación PHP nativo, MySQL/MariaDB y JavaScript. Conserva páginas, modelos, controladores, CSS y JavaScript separados.
 
-## Instalación nueva en XAMPP
+## Abrir en este equipo
 
-1. Copia MedLab dentro de `C:\xampp\htdocs\` y enciende Apache y MySQL.
-2. Importa `database/MedLabDB.sql` con una cuenta administradora de MySQL. Este archivo es para una base nueva; no lo importes sobre datos existentes.
-3. Copia `api/core/.env.example` a `api/core/.env`. Ajusta puerto, base, usuario exclusivo y contraseña.
-4. En `database/usuario_mysql.sql`, sustituye el marcador por una contraseña aleatoria única y ejecuta el SQL como DBA. Debe coincidir con el `.env`. El usuario de aplicación tiene únicamente SELECT, INSERT, UPDATE y DELETE.
-5. Crea el primer administrador desde terminal con una cuenta DBA configurada temporalmente para ese comando:
+1. Iniciar Apache y MySQL en XAMPP.
+2. Abrir `http://localhost/Sistema-Web-Equipo-Laboratorio/MedLab/login.php`.
+3. Iniciar sesión con una cuenta existente. No hay contraseña predeterminada.
 
-   ```powershell
-   $env:DATABASE_USER = 'root'
-   $env:DATABASE_PSSW = Read-Host 'Contraseña DBA local' -MaskInput
-   C:\xampp\php\php.exe database/crear_admin.php
-   Remove-Item Env:DATABASE_USER,Env:DATABASE_PSSW
-   ```
+La instalación actual usa MySQL en el puerto 3311. `api/core/.env` contiene la configuración privada; no debe publicarse. Para otra instalación, copiar `.env.example` y configurar servidor, puerto y credenciales reales.
 
-   Ejecuta el aprovisionamiento administrativo como tarea DBA separada del servicio web. Las variables del proceso prevalecen sobre `.env` y no cambian el archivo. El script pide la contraseña del nuevo usuario y avisa que será visible en terminal. Evita grabar la sesión.
-6. Abre [MedLab local](http://localhost/MedLab/) e inicia sesión. Solo administradores acceden a los CRUD, usuarios, roles y diagnóstico.
+## Funciones
 
-## Instalación existente
+- Usuarios y roles: gestión restringida al rol Administrador.
+- Inventario: categorías, estados, condiciones, instrumentos y cantidades totales/fuera de servicio; búsqueda y disponibilidad real.
+- Solicitudes: estudiantes y personal solicitan uno o varios instrumentos y eligen fecha de devolución.
+- Administración: aprobar/rechazar solicitudes, entregar instrumentos, recibir devoluciones parciales o completas y cancelar reservas.
+- Reservas: aprobar aparta cantidades durante catorce días. Vencer sin entrega libera disponibilidad automáticamente al consultarla. Lo entregado permanece ocupado hasta su devolución.
+- Devolución: máximo un mes calendario desde la entrega, con ajuste de fin de mes; zona horaria Guatemala. Las unidades devueltas dañadas quedan fuera de servicio. Las observaciones de cada recepción se conservan en el historial del préstamo.
+- Notificaciones internas: nuevas solicitudes para administradores y respuestas/movimientos para solicitantes, con marcado de lectura.
+- Reportes básicos: existencias, solicitudes por estado y devoluciones atrasadas. Historial consultable en Préstamos.
 
-Respalda la base y detén escrituras durante el cambio. Ejecuta `database/migrations/20261103_seguridad_marcas.sql` como DBA antes de usar el código actualizado. Conserva marcas anteriores, agrega versiones de sesión y actualiza el formato anterior de los contadores de login. Es repetible; las operaciones DDL hacen commits implícitos.
+## Primer uso del inventario
 
-Usa un usuario MySQL exclusivo de MedLab. No revoques permisos ni cambies la contraseña de una cuenta compartida con otras aplicaciones sin coordinarlas. El script de permisos afecta únicamente `usr_medlab`; no modifica cuentas anteriores de otros proyectos.
+Un administrador abre «Categorías», «Estados de equipo» y «Condiciones de equipo» para registrar los catálogos reales del laboratorio. Después abre «Equipos» y registra instrumentos. Un registro agrupa unidades del mismo tipo, marca y modelo; número de serie se usa únicamente cuando el registro representa una unidad. No se añaden datos de demostración a la base real.
 
-## Configuración
+«Fuera de servicio» determina cuántas unidades no se pueden solicitar. Estado y condición describen el lote. No se puede reducir el stock utilizable por debajo de lo reservado/prestado ni desactivar instrumentos ocupados. Los instrumentos con historial se desactivan en lugar de eliminarse.
 
-```dotenv
-APP_NAME=MedLab
-APP_ENV=local
-DATABASE_URL=localhost:3310
-DATABASE_USER=usr_medlab
-DATABASE_PSSW=UNA_CLAVE_ALEATORIA_EXCLUSIVA
-DATABASE_NAME=MedLabDB
-DATABASE_CHARSET=utf8mb4
-```
+Un usuario regular consulta Inventario y Préstamos. Puede cancelar sus solicitudes pendientes o reservas vigentes; solo un administrador aprueba, rechaza, entrega y registra devoluciones.
 
-Ajusta el puerto a tu instalación. En producción usa HTTPS y `APP_ENV=production`: las solicitudes HTTP se rechazan. No se confía automáticamente en cabeceras de proxy. Apache necesita `mod_rewrite`, `AllowOverride All` y aplicar los `.htaccess` para impedir acceso a configuración, SQL y carpetas internas. Otro servidor necesita restricciones equivalentes.
+## Base de datos
 
-## Estructura
+En esta instalación ya se aplicó la migración de cantidades. No volver a importar `database/MedLabDB.sql` encima de datos existentes.
 
-- `index.php`, `login.php`, `usuarios.php`, `roles.php`: acceso y administración.
-- `categorias.php`, `estados_equipo.php`, `condiciones_equipo.php`, `equipos.php`: flujo ordenado del inventario.
-- `api/admin/`: controladores públicos con autenticación, permisos, CSRF y métodos permitidos.
-- `api/core/`: entorno, conexión, sesión, contraseñas, límites y validación HTTP; sin acceso web directo.
-- `api/models/`: consultas preparadas y reglas de negocio; sin acceso web directo.
-- `database/`: esquema, migración, permisos y creación CLI del administrador; sin acceso web directo.
-- `js/lib/`: interfaz y solicitudes con token CSRF.
-- `tests/`: pruebas de contraseñas e integración aislada; sin acceso web directo.
-- `docs/SEGURIDAD.md`: explicación de medidas, verificación y pendientes.
-- `docs/DEFENSA_ORAL.md`: exposición y respuestas a preguntas.
+- Instalación nueva: importar el esquema en una base vacía y configurar `.env`.
+- Base anterior: seguir `database/FLUJO-PRESTAMOS.md`; el migrador tiene revisión previa, respaldo y mapa de estados. Por defecto solo lee, no aplica.
+- Primera cuenta, si no existe ninguna: desde MedLab ejecutar `C:\xampp\php\php.exe database\crear_admin.php` y completar sus datos.
 
-## Comprobaciones
+Los códigos de estados de préstamo son reglas del sistema, no un catálogo editable: PENDIENTE, APROBADO, RECHAZADO, ENTREGADO, DEVUELTO, RESERVA_VENCIDA y CANCELADO.
 
-```powershell
-C:\xampp\php\php.exe tests/passwords.php
-```
+## Seguridad y comprobaciones
 
-Las suites `tests/security_http.php` y `tests/throttle.php` requieren una BD desechable; sus controles impiden usar la base normal del proyecto. Consulta `docs/SEGURIDAD.md` para conocer puertos y variables de pruebas. No guardes contraseñas ni respaldos en archivos públicos o en el repositorio.
+Sesiones, autorización en servidor, CSRF en escrituras, consultas preparadas, límite de intentos y protección del último administrador activo. Aprobaciones y cambios de stock usan transacciones y bloqueos; no se confía en cantidades disponibles enviadas por el navegador.
 
-## Agregar un módulo
-
-Cada página debe llamar `Auth::proteger()`; cada API debe exigir autenticación y los permisos adecuados, métodos explícitos y CSRF para escrituras. Valida la entrada con `Request::form()` y en el modelo, usa PDO preparado y escapa la salida. Para recursos propios de cada usuario, comprueba también la propiedad: el login por sí solo no autoriza cualquier registro.
-
-## Flujo para registrar equipos
-
-1. Crea las categorías.
-2. Crea los estados de equipo.
-3. Crea las condiciones de equipo.
-4. Abre Equipos y selecciona los tres catálogos anteriores.
-5. Escribe la marca; si no existe, el servidor la crea y la relaciona dentro de la misma transacción.
-
-Una categoría inactiva no puede asignarse y una clasificación utilizada no puede eliminarse. No hay una pantalla CRUD independiente para marcas.
-
-## Pendiente antes de publicar
-
-Actualizar el PHP instalado (8.0.30, sin soporte de seguridad) y los demás componentes de XAMPP, habilitar HTTPS, restringir MySQL/phpMyAdmin y preparar monitoreo y respaldos con restauración probada. Los controles incorporados no garantizan inmunidad frente a ataques.
+El flujo se verifica con bases ficticias separadas, incluyendo aprobaciones simultáneas. No se exponen cuentas de prueba en la base real. La comprobación visual automática puede depender de la disponibilidad y permisos del navegador; las pruebas HTTP no certifican por sí solas accesibilidad WCAG ni apariencia en todos los dispositivos.

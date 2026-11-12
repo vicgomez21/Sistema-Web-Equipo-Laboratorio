@@ -19,6 +19,7 @@ class Connection extends PDO
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 PDO::ATTR_EMULATE_PREPARES   => false,
             ]);
+            $this->exec("SET time_zone = '-06:00'");
         } catch (PDOException $e) {
             // El detalle técnico va al log de PHP, no al usuario
             error_log("[MedLab] Error de conexion: " . $e->getMessage());
