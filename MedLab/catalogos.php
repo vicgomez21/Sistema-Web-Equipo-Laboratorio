@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__.'/api/core/Auth.php';Auth::proteger(false,true);
+require_once __DIR__.'/api/core/Auth.php';Auth::proteger(false,false,'catalogos');
 $tipo=$_GET['tipo']??'categorias';$catalogos=['categorias'=>['Categorías','id_categoria',60],'estados'=>['Estados de equipo','id_estado',30],'condiciones'=>['Condiciones de equipo','id_condicion',30]];
 if(!is_string($tipo)||!isset($catalogos[$tipo])){http_response_code(404);exit('Catálogo no válido.');}
 [$tituloPagina,$key,$max]=$catalogos[$tipo];$paginaActiva=['categorias'=>'categorias','estados'=>'estados_eq','condiciones'=>'condiciones'][$tipo];$scriptPagina='catalogos.js';$estiloPagina='inventario.css';require_once __DIR__.'/includes/layout_inicio.php';

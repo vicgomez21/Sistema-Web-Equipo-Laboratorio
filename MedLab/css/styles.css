@@ -24,7 +24,6 @@ body {
     line-height: 1.5;
 }
 
-/* ---------- Barra superior + hamburguesa ---------- */
 .topbar {
     position: sticky; top: 0; z-index: 20;
     display: flex; align-items: center; gap: 1rem;
@@ -48,7 +47,6 @@ body {
 .hamburguesa[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
 .hamburguesa[aria-expanded="true"] span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
-/* ---------- Menú deslizable ---------- */
 .overlay {
     position: fixed; inset: 0; z-index: 30;
     background: rgba(15, 23, 42, .45);
@@ -95,7 +93,6 @@ body {
     background: var(--color-espera-fondo); color: var(--color-espera);
 }
 
-/* ---------- Contenido ---------- */
 .content { max-width: 1100px; margin: 0 auto; padding: 1.5rem; display: grid; gap: 1.25rem; }
 
 .page-header {
@@ -116,7 +113,6 @@ body {
 .card__header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
 .accesos { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1rem; }
 
-/* ---------- Botones ---------- */
 .btn {
     display: inline-block;
     padding: .55rem 1rem; font: inherit; font-weight: 600;
@@ -131,7 +127,6 @@ body {
 .btn--peligro:hover { background: var(--color-error-fondo); }
 .btn--sm { padding: .3rem .7rem; font-size: .85rem; }
 
-/* ---------- Tablas ---------- */
 .buscador {
     width: 100%; max-width: 360px; margin-bottom: 1rem;
     padding: .55rem .8rem; font: inherit;
@@ -148,13 +143,11 @@ body {
 .tabla-acciones .btn + .btn { margin-left: .35rem; }
 .tabla-vacia { text-align: center !important; color: var(--color-texto-suave); padding: 2rem !important; }
 
-/* ---------- Badges ---------- */
 .badge { display: inline-block; padding: .2rem .7rem; border-radius: 999px; font-size: .8rem; font-weight: 600; }
 .badge--ok { background: var(--color-ok-fondo); color: var(--color-ok); }
 .badge--error { background: var(--color-error-fondo); color: var(--color-error); }
 .badge--wait { background: var(--color-espera-fondo); color: var(--color-espera); }
 
-/* ---------- Diálogo / formularios ---------- */
 dialog {
     margin: auto; padding: 0; border: 0; border-radius: 12px;
     width: min(580px, 92vw);
@@ -188,7 +181,6 @@ dialog::backdrop { background: rgba(15, 23, 42, .5); }
     padding: .6rem .8rem; border-radius: 8px; font-size: .9rem;
 }
 
-/* ---------- Tarjeta de conexión (Inicio) ---------- */
 .info { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1rem 0; }
 .info dt { font-size: .8rem; color: var(--color-texto-suave); text-transform: uppercase; letter-spacing: .04em; }
 .info dd { font-weight: 600; }
@@ -205,7 +197,6 @@ dialog::backdrop { background: rgba(15, 23, 42, .5); }
 .tables .ok { color: var(--color-ok); }
 .tables .falta { color: var(--color-error); }
 
-/* ---------- Aviso temporal ---------- */
 .toast {
     position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 60;
     max-width: 90vw; padding: .8rem 1.2rem; border-radius: 8px;
@@ -215,7 +206,6 @@ dialog::backdrop { background: rgba(15, 23, 42, .5); }
 }
 .toast.visible { opacity: 1; transform: translateY(0); }
 
-/* ---------- Responsive ---------- */
 @media (max-width: 600px) {
     .topbar__title { font-size: .95rem; }
     .content { padding: 1rem; }
@@ -272,6 +262,8 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--color-marca); o
 .login-page { background: #fff; }
 .login-shell { min-height: 100vh; min-height: 100svh; display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
 .login-story { display: flex; flex-direction: column; justify-content: space-between; gap: 3rem; padding: clamp(2rem, 5vw, 5rem); background: #073c40; color: #fff; }
+.login-story .brand { align-self: flex-start; gap: clamp(.6rem, 1.4vw, 1.4rem); font-size: clamp(2.3rem, 4vw, 4rem); line-height: 1; }
+.login-story .brand img { width: clamp(7rem, 13vw, 13rem); height: auto; }
 .login-story h1 { max-width: 14ch; font-size: clamp(2rem, 3vw, 3rem); font-weight: 600; line-height: 1.2; letter-spacing: -.035em; margin-bottom: 1.25rem; text-wrap: balance; }
 .login-story p { color: #c1dcd8; font-size: 1rem; }
 .login-panel { display: flex; align-items: center; justify-content: center; padding: clamp(2rem, 5vw, 5rem); min-width: 0; }
@@ -290,6 +282,8 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--color-marca); o
 @media (max-width: 800px) {
     .login-shell { grid-template-columns: 1fr; }
     .login-story { padding: 1.5rem; gap: 1.75rem; }
+    .login-story .brand { font-size: 2.25rem; }
+    .login-story .brand img { width: clamp(4.5rem, 16vw, 6rem); }
     .login-story h1 { max-width: 24ch; font-size: 1.65rem; margin-bottom: .5rem; }
     .login-panel { padding: 2rem 1.5rem; align-items: start; }
     .topbar__description { display: none; }

@@ -60,8 +60,11 @@
         el('prestamosConteo').textContent = `${list.length} de ${loans.length} préstamos`;
         el('tablaPrestamos').innerHTML = list.map((loan) => {
             const s = state(loan), overdue = s === 'ENTREGADO' && loan.fecha_limite && String(loan.fecha_limite).slice(0, 10) < today();
+            const totalUnits = (loan.detalles || []).reduce((sum, d) => sum + Number(d.cantidad), 0);
+            const remaining = (loan.detalles || []).reduce((sum, d) => sum + pendingQuantity(d), 0);
+            const partial = s === 'ENTREGADO' && remaining > 0 && remaining < totalUnits;
             const detail = (loan.detalles || []).map((d) => `<li>${h(d.nombre)} · ${h(d.cantidad)} unidad(es)${Number(d.cantidad_devuelta) ? ` · ${h(d.cantidad_devuelta)} devuelta(s)` : ''}</li>`).join('');
-            return `<tr><td><strong>#${h(loan.id_prestamo)}</strong><span class="loan-meta">${h(date(loan.fecha_solicitud))}</span></td><td>${h(loan.solicitante || '—')}</td><td><ul>${detail}</ul><span class="loan-meta">Devolución solicitada: ${h(date(loan.fecha_devolucion_solicitada))}</span>${loan.fecha_limite ? `<span class="loan-meta">Fecha límite: ${h(date(loan.fecha_limite))}</span>` : ''}${s === 'APROBADO' && loan.fecha_reserva_hasta ? `<span class="loan-meta">Reserva hasta: ${h(date(loan.fecha_reserva_hasta))}</span>` : ''}<details><summary>Más información</summary>${loan.fecha_aprobacion ? `<p class="loan-meta">Aprobado: ${h(date(loan.fecha_aprobacion))}</p>` : ''}${loan.fecha_prestamo ? `<p class="loan-meta">Entregado: ${h(date(loan.fecha_prestamo))}</p>` : ''}<p class="loan-note">${h(loan.observaciones || 'Sin observaciones.')}</p>${loan.motivo_rechazo ? `<p class="loan-note">Motivo del rechazo: ${h(loan.motivo_rechazo)}</p>` : ''}</details></td><td><span class="loan-state">${h(names[s] || loan.estado_nombre || s)}</span>${overdue ? '<span class="loan-late">Devolución atrasada</span>' : ''}</td><td><div class="loan-actions">${actions(loan)}</div></td></tr>`;
+            return `<tr><td><strong>#${h(loan.id_prestamo)}</strong><span class="loan-meta">${h(date(loan.fecha_solicitud))}</span></td><td>${h(loan.solicitante || '—')}</td><td><ul>${detail}</ul><span class="loan-meta">Devolución solicitada: ${h(date(loan.fecha_devolucion_solicitada))}</span>${loan.fecha_limite ? `<span class="loan-meta">Fecha límite: ${h(date(loan.fecha_limite))}</span>` : ''}${s === 'APROBADO' && loan.fecha_reserva_hasta ? `<span class="loan-meta">Reserva hasta: ${h(date(loan.fecha_reserva_hasta))}</span>` : ''}<details><summary>Más información</summary>${loan.fecha_aprobacion ? `<p class="loan-meta">Aprobado: ${h(date(loan.fecha_aprobacion))}</p>` : ''}${loan.fecha_prestamo ? `<p class="loan-meta">Entregado: ${h(date(loan.fecha_prestamo))}</p>` : ''}<p class="loan-note">${h(loan.observaciones || 'Sin observaciones.')}</p>${loan.motivo_rechazo ? `<p class="loan-note">Motivo del rechazo: ${h(loan.motivo_rechazo)}</p>` : ''}</details></td><td><span class="loan-state">${partial ? 'Devolución parcial' : h(names[s] || loan.estado_nombre || s)}</span>${partial ? `<span class="loan-meta">Por devolver: ${remaining} de ${totalUnits} unidades</span>` : ''}${overdue ? '<span class="loan-late">Devolución atrasada</span>' : ''}</td><td><div class="loan-actions">${actions(loan)}</div></td></tr>`;
         }).join('') || '<tr><td colspan="5" class="tabla-vacia">No hay préstamos que coincidan. Puedes cambiar los filtros o solicitar un préstamo.</td></tr>';
     }
     async function loadLoans() {
@@ -84,11 +87,22 @@
         row.querySelector('button').addEventListener('click', () => { row.remove(); el('agregarEquipoSolicitud').focus(); });
         el('filasSolicitud').append(row); row.querySelector('select').focus();
     }
-    el('solicitarPrestamo').addEventListener('click', async (event) => {
-        const button = event.currentTarget; if (button.disabled) return; button.disabled = true; clearError('prestamosError');
-        try { await loadEquipment(); if (!equipment.length) throw new Error('No hay equipos disponibles para solicitar en este momento.'); el('formSolicitud').reset(); el('filasSolicitud').replaceChildren(); clearError('solicitudError'); el('fechaSolicitada').min = today(); el('fechaSolicitada').max = limitDate(); openDialog('dialogoSolicitud', button); addRequestLine(); }
+    async function requestEquipment(selectedId = '') {
+        const button = el('solicitarPrestamo'); if (button.disabled) return; button.disabled = true; clearError('prestamosError');
+        try { await loadEquipment(); if (!equipment.length) throw new Error('No hay equipos disponibles para solicitar en este momento.'); el('formSolicitud').reset(); el('filasSolicitud').replaceChildren(); clearError('solicitudError'); el('fechaSolicitada').min = today(); el('fechaSolicitada').max = limitDate(); openDialog('dialogoSolicitud', button); addRequestLine();
+            if (selectedId) {
+                const select = el('filasSolicitud').querySelector('select');
+                select.value = selectedId;
+                if (select.value) {
+                    select.dispatchEvent(new Event('change'));
+                    el('filasSolicitud').querySelector('input').focus();
+                } else {
+                    showError('solicitudError', 'Este instrumento ya no está disponible. Puedes elegir otro.');
+                }
+            } }
         catch (error) { showError('prestamosError', error.message); } finally { button.disabled = false; }
-    });
+    }
+    el('solicitarPrestamo').addEventListener('click', () => requestEquipment());
     el('agregarEquipoSolicitud').addEventListener('click', addRequestLine);
     el('formSolicitud').addEventListener('submit', async (event) => {
         event.preventDefault(); const form = event.currentTarget; if (form.dataset.busy === '1') return; clearError('solicitudError');
@@ -112,9 +126,26 @@
         if (action === 'cancelar') content += '<p>La solicitud quedará cancelada. Si tenía una reserva vigente, sus equipos volverán a estar disponibles.</p>';
         if (action === 'rechazar') content += '<div class="campo"><label for="motivoRechazoPrestamo">Motivo del rechazo</label><textarea id="motivoRechazoPrestamo" rows="3" maxlength="500" required></textarea></div>';
         if (action === 'entregar') content += `<p>Confirma que los equipos se entregan al solicitante. El plazo máximo es un mes a partir de hoy.</p><div class="campo"><label for="fechaLimitePrestamo">Fecha límite de devolución</label><input id="fechaLimitePrestamo" type="date" min="${h(today())}" max="${h(deliveryLimit)}" required value="${h(String(loan.fecha_devolucion_solicitada || '').slice(0, 10) >= today() && String(loan.fecha_devolucion_solicitada).slice(0, 10) <= deliveryLimit ? String(loan.fecha_devolucion_solicitada).slice(0, 10) : '')}"></div>`;
-        if (action === 'devolver') content += '<p>Registra solo lo recibido ahora. Puedes completar el préstamo con devoluciones posteriores. Indica cuántas unidades recibidas deben salir de servicio.</p>' + (loan.detalles || []).filter((d) => pendingQuantity(d) > 0).map((d) => `<fieldset data-return-detail="${h(d.id_detalle)}" data-remaining="${h(pendingQuantity(d))}"><legend>${h(d.nombre)} · ${h(pendingQuantity(d))} pendiente(s)</legend><div class="loan-return-grid"><div class="campo"><label for="recibidas${h(d.id_detalle)}">Unidades recibidas ahora</label><input id="recibidas${h(d.id_detalle)}" class="return-quantity" type="number" min="0" max="${h(pendingQuantity(d))}" step="1" value="0" required></div><div class="campo"><label for="fueraServicio${h(d.id_detalle)}">De las recibidas, fuera de servicio</label><input id="fueraServicio${h(d.id_detalle)}" class="return-unserviceable" type="number" min="0" max="${h(pendingQuantity(d))}" step="1" value="0" required></div><div class="campo campo--completo"><label for="condicion${h(d.id_detalle)}">Condición de recepción</label><select id="condicion${h(d.id_detalle)}" class="return-condition">${conditionOptions()}</select></div><div class="campo campo--completo"><label for="notaDevolucion${h(d.id_detalle)}">Observaciones de recepción (opcional)</label><textarea id="notaDevolucion${h(d.id_detalle)}" class="return-note" maxlength="500" rows="2"></textarea></div></div></fieldset>`).join('');
+        if (action === 'devolver') content += '<p>Registra solo lo recibido ahora. Puedes completar el préstamo con devoluciones posteriores. La condición describe cómo llegó el equipo. Si alguna unidad ya no se puede prestar, indica cuántas quedan fuera de servicio.</p>' + (loan.detalles || []).filter((d) => pendingQuantity(d) > 0).map((d) => `<fieldset data-return-detail="${h(d.id_detalle)}" data-remaining="${h(pendingQuantity(d))}"><legend>${h(d.nombre)} · ${h(pendingQuantity(d))} pendiente(s)</legend><div class="loan-return-grid"><div class="campo"><label for="recibidas${h(d.id_detalle)}">Unidades recibidas ahora</label><input id="recibidas${h(d.id_detalle)}" class="return-quantity" type="number" min="0" max="${h(pendingQuantity(d))}" step="1" value="0" required></div><div class="campo"><label for="fueraServicio${h(d.id_detalle)}">De las recibidas, fuera de servicio</label><input id="fueraServicio${h(d.id_detalle)}" class="return-unserviceable" type="number" min="0" max="${h(pendingQuantity(d))}" step="1" value="0" required></div><div class="campo campo--completo"><label for="condicion${h(d.id_detalle)}">Condición de recepción</label><select id="condicion${h(d.id_detalle)}" class="return-condition">${conditionOptions()}</select></div><div class="campo campo--completo"><label for="notaDevolucion${h(d.id_detalle)}">Observaciones de recepción (opcional)</label><textarea id="notaDevolucion${h(d.id_detalle)}" class="return-note" maxlength="500" rows="2"></textarea></div></div><p class="loan-return-summary" role="status"></p></fieldset>`).join('');
         el('camposAccionPrestamo').innerHTML = content;
-        el('camposAccionPrestamo').querySelectorAll('[data-return-detail]').forEach((field) => field.querySelector('.return-quantity').addEventListener('input', () => { const value = Number(field.querySelector('.return-quantity').value); field.querySelector('.return-condition').required = value > 0; field.querySelector('.return-unserviceable').max = String(Math.max(0, value)); }));
+        for (const field of el('camposAccionPrestamo').querySelectorAll('[data-return-detail]')) {
+            const received = field.querySelector('.return-quantity');
+            const damaged = field.querySelector('.return-unserviceable');
+            const summary = field.querySelector('.loan-return-summary');
+            const pending = Number(field.dataset.remaining);
+            function updateSummary() {
+                const count = received.valueAsNumber;
+                const out = damaged.valueAsNumber;
+                damaged.max = String(Number.isInteger(count) && count >= 0 ? count : 0);
+                field.querySelector('.return-condition').required = count > 0;
+                summary.textContent = received.validity.valid && damaged.validity.valid
+                    ? `Disponibles de nuevo: ${count - out}. Fuera de servicio: ${out}. Pendientes de devolución: ${pending - count}.`
+                    : 'Revisa las cantidades: las unidades fuera de servicio deben estar entre cero y el total recibido.';
+            }
+            received.addEventListener('input', updateSummary);
+            damaged.addEventListener('input', updateSummary);
+            updateSummary();
+        }
         openDialog('dialogoAccionPrestamo', button);
     }
     el('tablaPrestamos').addEventListener('click', async (event) => {
@@ -160,4 +191,11 @@
     el('buscarPrestamo').addEventListener('input', render); el('filtrarEstadoPrestamo').addEventListener('change', render);
     el('refrescarPrestamos').addEventListener('click', async (event) => { const button = event.currentTarget; if (button.disabled) return; button.disabled = true; try { await Promise.all([loadLoans(), loadNotifications()]); } finally { button.disabled = false; } });
     loadLoans(); loadNotifications();
+    const url = new URL(location.href);
+    const selectedId = url.searchParams.get('equipo');
+    if (selectedId) {
+        url.searchParams.delete('equipo');
+        history.replaceState(history.state, '', url);
+        requestEquipment(selectedId);
+    }
 })();

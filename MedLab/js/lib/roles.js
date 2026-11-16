@@ -1,8 +1,6 @@
-// ================= MÓDULO ROLES (CRUD) =================
 let API_ROLES = "api/admin/C_Roles.php";
 let roles = [];
 
-// ---------- LISTAR ----------
 async function cargarRoles() {
     try {
         let respuesta = await peticion(API_ROLES);
@@ -45,7 +43,6 @@ function pintarRoles() {
     $("#tablaRoles").innerHTML = filas;
 }
 
-// ---------- FORMULARIO ----------
 function abrirFormulario(rol = null) {
     $("#formRol").reset();
     limpiarError("#rolError");
@@ -55,11 +52,16 @@ function abrirFormulario(rol = null) {
         $("#rolNombre").value = rol.nombre;
         $("#rolDescripcion").value = rol.descripcion ?? "";
     }
+    const administrador = rol?.nombre.trim().toLowerCase() === "administrador";
+    const permisos = (rol?.permisos ?? "").split(",");
+    for (const opcion of document.querySelectorAll('#formRol [name="permiso"]')) {
+        opcion.checked = administrador || permisos.includes(opcion.value);
+        opcion.disabled = administrador;
+    }
     $("#dialogoRol").showModal();
     $("#rolNombre").focus();
 }
 
-// ---------- GUARDAR (POST o PUT) ----------
 async function guardarRol(evento) {
     evento.preventDefault();
     limpiarError("#rolError");
@@ -68,6 +70,7 @@ async function guardarRol(evento) {
     let datos = {
         nombre: $("#rolNombre").value,
         descripcion: $("#rolDescripcion").value,
+        permisos: Array.from(document.querySelectorAll('#formRol [name="permiso"]:checked'), opcion => opcion.value).join(","),
     };
 
     try {
@@ -84,7 +87,6 @@ async function guardarRol(evento) {
     }
 }
 
-// ---------- ELIMINAR ----------
 async function eliminarRol(id) {
     let rol = roles.find((r) => r.id_rol == id);
     if (!confirm(`¿Eliminar el rol "${rol.nombre}"?`)) return;
@@ -98,7 +100,6 @@ async function eliminarRol(id) {
     }
 }
 
-// ---------- EVENTOS ----------
 $("#botonNuevo").addEventListener("click", () => abrirFormulario());
 $("#botonCancelar").addEventListener("click", () => $("#dialogoRol").close());
 $("#formRol").addEventListener("submit", guardarRol);

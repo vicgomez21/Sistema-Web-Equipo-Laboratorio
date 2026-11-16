@@ -5,11 +5,11 @@ if (!empty($_SESSION['usuario']) && time() - ($_SESSION['actividad'] ?? 0) <= 18
 $error = $_SESSION['login_error'] ?? ''; unset($_SESSION['login_error']);
 ?>
 <!DOCTYPE html>
-<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Iniciar sesión | MedLab</title><link rel="stylesheet" href="css/styles.css?v=<?= filemtime(__DIR__ . '/css/styles.css') ?>"></head>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>MedLab | Iniciar sesión</title><link rel="icon" type="image/svg+xml" href="assets/logo.svg"><link rel="stylesheet" href="css/styles.css?v=<?= filemtime(__DIR__ . '/css/styles.css') ?>"></head>
 <body class="login-page">
 <main class="login-shell">
 <section class="login-story" aria-label="MedLab">
-    <a class="brand" href="login.php"><img src="assets/logo.svg" alt="" width="56" height="56">MedLab</a>
+    <a class="brand" href="login.php"><img src="assets/logo-electrico.svg" alt="" width="56" height="56">MedLab</a>
     <div><h1>Gestión de equipos de laboratorio</h1><p>Laboratorio de medicina</p></div>
 </section>
 <section class="login-panel"><div class="login-form-wrap"><h2>Inicia sesión</h2><p class="login-description">Usa tu correo o código de usuario y tu contraseña.</p>

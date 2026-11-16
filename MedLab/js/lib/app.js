@@ -1,4 +1,3 @@
-// ================= UTILIDADES COMPARTIDAS (se cargan en todas las páginas) =================
 
 // ATAJO PARA EL DOM
 let $ = (selector) => document.querySelector(selector);
@@ -54,7 +53,6 @@ function limpiarError(selector) {
     $(selector).hidden = true;
 }
 
-// ================= MENÚ HAMBURGUESA =================
 function abrirMenu() {
     document.querySelector('main').inert = true;
     document.querySelector('.topbar').inert = true;

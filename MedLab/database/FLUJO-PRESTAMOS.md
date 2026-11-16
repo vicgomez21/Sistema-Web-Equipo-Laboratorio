@@ -1,14 +1,14 @@
-# Inventario por cantidades y préstamos — adaptación mínima
+# Inventario por cantidades y flujo de préstamos
 
-Se conservan las nueve tablas originales y sus claves. Se añade únicamente `notificaciones` y una vista de lectura `disponibilidad_equipos`. No se sustituye el modelo por un sistema nuevo.
+La adaptación conserva las tablas originales y sus claves y añade `notificaciones` y la vista de lectura `disponibilidad_equipos`. El flujo está implementado en `api/models/M_Prestamos.php`, los controladores de préstamos/notificaciones y `prestamos.php`.
 
 ## Significado de los datos
 
 - `equipos` identifica un tipo/lote homogéneo de instrumento. `cantidad_total` cuenta unidades y `cantidad_fuera_servicio` excluye unidades dañadas o no utilizables. Código de inventario, categoría, marca, modelo, ubicación y relaciones existentes se conservan. `numero_serie` sigue siendo opcional y solo describe una unidad individual: no poner un número de serie como si identificara varias unidades. No se fusionan registros históricos automáticamente.
 - `prestamos` representa tanto solicitud como préstamo. Nuevas fechas de solicitud, aprobación y decisión y su responsable complementan las columnas existentes. `fecha_prestamo` conserva su significado de entrega efectiva y permanece NULL mientras no se entregue. `fecha_limite` es la fecha real de devolución comprometida; `fecha_devolucion_solicitada` guarda la fecha que eligió el solicitante para validarla al entregar.
-- `detalle_prestamo` mantiene un renglón por instrumento y préstamo: ahora incluye `cantidad` y `cantidad_devuelta`. No se permite cantidad cero, devolución superior a lo entregado ni cierre sin devolución completa. Los campos de recepción existentes describen el cierre del renglón; un historial detallado de múltiples devoluciones parciales requeriría un registro adicional, que no se añade sin definir ese proceso.
+- `detalle_prestamo` mantiene un renglón por instrumento y préstamo: ahora incluye `cantidad` y `cantidad_devuelta`. No se permite cantidad cero, devolución superior a lo entregado ni cierre sin devolución completa. Los campos de recepción existentes describen el cierre del renglón. Cada recepción parcial o completa añade además una entrada al campo `prestamos.observaciones`, con fecha, responsable, equipo, cantidad, condición, unidades fuera de servicio y observaciones. Este historial de texto no es una tabla independiente de eventos.
 - `estados_prestamo` conserva ID y nombre y añade `codigo` estable: PENDIENTE, APROBADO, RECHAZADO, ENTREGADO, DEVUELTO, RESERVA_VENCIDA, CANCELADO. El código identifica la regla; el nombre sirve para mostrarla.
-- `notificaciones` permite avisos internos, responsable, fecha de lectura y un evento único por usuario/préstamo. No envía correo ni WhatsApp. La pantalla y los productores de estos avisos aún no están implementados.
+- `notificaciones` permite avisos internos, responsable, fecha de lectura y un evento único por usuario/préstamo. No envía correo ni WhatsApp. Los productores de avisos se ejecutan en las transacciones del flujo; el usuario los consulta y marca como leídos desde Préstamos.
 
 ## Reglas confirmadas
 
@@ -21,19 +21,19 @@ Se conservan las nueve tablas originales y sus claves. Se añade únicamente `no
 
 `disponibilidad_equipos` calcula total - fuera de servicio - reservas vigentes - cantidades prestadas no devueltas. No mantiene contadores duplicados. En instrumentos inactivos devuelve disponibilidad cero. Se conserva la columna generada antigua `equipo_pendiente`, pero se retira su índice UNIQUE porque impedía prestar distintas cantidades del mismo instrumento a varias personas; no debe usarse para decidir disponibilidad.
 
-## Contrato obligatorio del futuro módulo de préstamos
+## Controles del módulo de préstamos
 
-La vista NO impide por sí sola aprobar más unidades de las existentes. Antes de publicar acciones de préstamo:
+La vista NO impide por sí sola aprobar más unidades de las existentes. El modelo aplica estos controles en servidor:
 
 - Exigir sesión/permiso y CSRF, identificar solicitante desde sesión y validar fecha elegida/cantidades en servidor.
-- En aprobación, iniciar transacción, bloquear la solicitud y sus equipos con SELECT FOR UPDATE en orden de ID, comprobar estado PENDIENTE y volver a leer disponibilidad actual bajo bloqueo. Rechazar si no alcanza; aprobar una sola vez. Todas las rutas que cambien inventario, reservas o devoluciones deben seguir el mismo orden de bloqueo.
+- En aprobación, iniciar transacción, bloquear primero los equipos en orden ascendente de ID y después la solicitud y sus detalles; comprobar estado PENDIENTE y volver a leer disponibilidad actual bajo bloqueo. Rechazar si no alcanza; aprobar una sola vez. Todas las rutas que cambien inventario, reservas o devoluciones deben seguir el mismo orden de bloqueo.
 - Usar lectura actual y consistente con esos bloqueos; no una fotografía previa de disponibilidad bajo REPEATABLE READ. Una comprobación anterior a la transacción no es suficiente.
-- Entrega: bloquear solicitud/equipos, comprobar APROBADO y reserva vigente, validar la fecha elegida respecto de la entrega real y registrar todos los campos en la misma transacción.
+- Entrega: mantener el orden equipos → solicitud → detalles, comprobar APROBADO y reserva vigente, validar la fecha elegida respecto de la entrega real y registrar todos los campos en la misma transacción.
 - Devolución: bloquear los mismos registros, validar cantidad pendiente y actualizar recepción/condición y cantidad devuelta. Las unidades dañadas pasan a fuera de servicio sin volver a quedar disponibles.
 - Cancelación/vencimiento: solo libera reservas sin entregar; nunca libera un préstamo entregado. Al consultar se puede mostrar el estado efectivo de vencimiento y persistirlo con una tarea periódica o proceso de mantenimiento; todavía no se instala ningún programador.
 - Registrar notificaciones en la transacción que cambia el estado, usando evento estable y la restricción única para reintentos.
 
-No hay aún controladores ni pantallas de inventario/préstamos. Esta entrega adapta almacenamiento y reglas estructurales, no habilita esas operaciones en la interfaz.
+Las pantallas de Inventario, Catálogos y Préstamos consumen estos controladores. La disponibilidad y los permisos se vuelven a validar en servidor; los controles de la interfaz no sustituyen esas comprobaciones.
 
 ## Instalación nueva
 

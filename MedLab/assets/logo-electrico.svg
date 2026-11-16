@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <style>
+    .spark { stroke-dasharray: 6 24 2 8; stroke-linecap: round; animation: travel 3s linear infinite; }
+    .halo { opacity: .65; stroke-width: 5; }
+    .core { stroke-width: 1.7; }
+    @keyframes travel { to { stroke-dashoffset: -80; } }
+    @media (prefers-reduced-motion: reduce) { .spark { animation: none; } }
+  </style>
+  <defs>
+    <path id="current" d="M72 16 l-4 -1 1 -2 C28 -2 5 32 12 59 l2 2 -1 3 Q29 104 73 85 l1 -3 3 1 4 -2 M64 43 Q85 53 77 72 l-3 2 1 2 Q70 83 61 82 M32 67h29 M33 88h46"/>
+    <filter id="glow" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur stdDeviation="2"/></filter>
+  </defs>
+  <path d="M72 16a39 39 0 1 0 9 65" stroke="#00D1C1" stroke-width="6" stroke-linecap="round"/>
+  <g transform="rotate(34 56 36)" fill="#00D1C1"><rect x="46" y="13" width="20" height="39" rx="3"/><rect x="50" y="5" width="12" height="9" rx="2"/><rect x="51" y="52" width="10" height="8" rx="1"/></g>
+  <path d="M64 43c25 12 20 39-3 39M32 67h29M51 80v7M33 88h46" stroke="#00D1C1" stroke-width="7" stroke-linecap="round"/>
+
+  <use href="#current" class="spark halo" stroke="#ad6dff" filter="url(#glow)"/>
+  <use href="#current" class="spark core" stroke="#ecc7ff"/>
+</svg>

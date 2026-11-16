@@ -6,11 +6,11 @@ require_once __DIR__ . '/../models/M_Prestamos.php';
 try {
     $model = new M_Prestamos(new Connection());
     $user = (int)$_SESSION['usuario']['id_usuario'];
-    if ($_SERVER['REQUEST_METHOD'] === 'GET') Response::success('Préstamos obtenidos correctamente.', $model->listar($user, Auth::esAdministrador()), 1);
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') Response::success('Préstamos obtenidos correctamente.', $model->listar($user, Auth::puede('prestamos')), 1);
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') Response::error('Método no permitido.', 405, 405);
     $action = $_POST['accion'] ?? '';
     if (!is_string($action)) throw new RuntimeException('Acción no válida.', 400);
-    $result = $model->ejecutar($action, $_POST, $user, Auth::esAdministrador());
+    $result = $model->ejecutar($action, $_POST, $user, Auth::puede('prestamos'));
     Response::success('Operación de préstamo registrada correctamente.', $result, 1);
 } catch (PDOException $e) {
     $number = (int)($e->errorInfo[1] ?? 0);

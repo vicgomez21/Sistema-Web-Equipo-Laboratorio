@@ -17,10 +17,10 @@ class M_Roles
 
     function SELECT_ROLES()
     {
-        $query = "SELECT r.id_rol, r.nombre, r.descripcion, COUNT(u.id_usuario) AS total_usuarios
+        $query = "SELECT r.id_rol, r.nombre, r.descripcion, r.permisos, COUNT(u.id_usuario) AS total_usuarios
                   FROM roles r
                   LEFT JOIN usuarios u ON u.id_rol = r.id_rol
-                  GROUP BY r.id_rol, r.nombre, r.descripcion
+                  GROUP BY r.id_rol, r.nombre, r.descripcion, r.permisos
                   ORDER BY r.id_rol DESC";
         $statement = $this->connection->prepare($query);
         $statement->execute();
@@ -31,7 +31,7 @@ class M_Roles
     {
         $datos = $this->VALIDAR_DATOS($arrayData);
 
-        $query = "INSERT INTO roles (nombre, descripcion) VALUES (:nombre, :descripcion)";
+        $query = "INSERT INTO roles (nombre, descripcion, permisos) VALUES (:nombre, :descripcion, :permisos)";
         try {
             $statement = $this->connection->prepare($query);
             $statement->execute($datos);
@@ -46,7 +46,7 @@ class M_Roles
         $idRol = $this->OBTENER_ID($arrayData['id_rol'] ?? null);
         $datos = $this->VALIDAR_DATOS($arrayData);
 
-        $query = "UPDATE roles SET nombre = :nombre, descripcion = :descripcion WHERE id_rol = :id_rol";
+        $query = "UPDATE roles SET nombre = :nombre, descripcion = :descripcion, permisos = COALESCE(:permisos, permisos) WHERE id_rol = :id_rol";
         try {
             $rolesBloqueados = AdminGuard::begin($this->connection);
             $this->VERIFICAR_QUE_EXISTE($idRol);
@@ -80,7 +80,6 @@ class M_Roles
         $this->response->success("Rol eliminado correctamente", [], 1);
     }
 
-    # ---------- Métodos de apoyo ----------
 
     private function VALIDAR_DATOS(array $arrayData): array
     {
@@ -97,7 +96,13 @@ class M_Roles
             $this->response->error("La descripción no puede superar los 150 caracteres", 3003, 422);
         }
 
+        $permisos = $arrayData['permisos'] ?? null;
+        if ($permisos !== null && (!is_string($permisos) || ($permisos !== '' &&
+            array_diff(explode(',', $permisos), array_keys(Auth::PERMISOS))))) {
+            $this->response->error('Selecciona permisos válidos.', 3008, 422);
+        }
         return [
+            'permisos' => $permisos === null ? null : implode(',', array_unique(explode(',', $permisos))),
             'nombre'      => $nombre,
             'descripcion' => $descripcion === '' ? null : $descripcion,
         ];

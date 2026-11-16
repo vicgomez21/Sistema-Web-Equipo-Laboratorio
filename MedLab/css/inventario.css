@@ -13,3 +13,22 @@
 #inventarioEstado,#catalogoEstado { margin:.75rem 0; color:#536b6b; }
 #inventarioError,#catalogoError { margin:.75rem 0; color:#9b2020; }
 @media(max-width:600px) { .inventory-toolbar { grid-template-columns:1fr; } .page-header { align-items:flex-start; gap:1rem; } .tabla-acciones { white-space:nowrap; } }
+
+.reporte-cifras, .reporte-graficas { display:grid; gap:1rem; margin:1rem 0; }
+.reporte-cifras { grid-template-columns:repeat(auto-fit,minmax(min(100%,10rem),1fr)); }
+.reporte-cifras > div { padding:1rem 1.25rem; background:#edf6f4; border-radius:.5rem; border-top:3px solid #00828a; }
+.reporte-cifras dt { color:#254c50; }
+.reporte-cifras dd { margin:.3rem 0 0; font-size:2rem; font-weight:700; color:#004850; }
+.reporte-graficas { grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr)); }
+.reporte-graficas .card { margin:0; }
+
+.reporte-graficas .card { min-width:0; }
+.reporte-pastel { display:flex; align-items:center; justify-content:space-evenly; flex-wrap:wrap; gap:1rem; margin-top:1.5rem; }
+.reporte-pastel > svg { width:min(100%,12rem); height:auto; }
+.reporte-pastel ul { padding:0; margin:0; list-style:none; }
+.reporte-pastel li { display:grid; grid-template-columns:auto 1fr auto; gap:.6rem; align-items:center; padding:.3rem 0; }
+.reporte-scroll { overflow-x:auto; }
+.reporte-columnas { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(3.8rem,1fr); list-style:none; padding:0; margin:1rem 0 0; }
+.reporte-columnas li { text-align:center; line-height:1.2; font-size:.82rem; overflow-wrap:break-word; }
+.reporte-columnas svg { display:block; width:100%; height:11rem; margin:0 auto .4rem; }
+.reporte-lector { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }

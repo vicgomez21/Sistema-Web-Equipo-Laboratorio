@@ -1,4 +1,3 @@
-// ================= PÁGINA DE INICIO: prueba de conexión a MySQL =================
 let API_CONEXION = "api/admin/C_Conexion.php";
 
 function marcarEstado(clase, texto) {

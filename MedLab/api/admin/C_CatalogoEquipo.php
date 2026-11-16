@@ -5,7 +5,7 @@ if (!isset($tipoCatalogo) || !in_array($tipoCatalogo, ['categorias', 'estados', 
 }
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/Request.php';
-Auth::administrador(true);
+Auth::proteger(true,false,'catalogos');
 Request::metodos(['GET', 'POST', 'PUT', 'DELETE']);
 require_once __DIR__ . '/../core/Connection.php';
 require_once __DIR__ . '/../models/M_CatalogosEquipo.php';

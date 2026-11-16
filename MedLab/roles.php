@@ -52,6 +52,13 @@ require_once __DIR__ . '/includes/layout_inicio.php';
                     <textarea id="rolDescripcion" maxlength="150" rows="3"></textarea>
                 </div>
             </div>
+            <fieldset>
+                <legend>Permisos del rol</legend>
+                <p>Todos pueden consultar inventario y solicitar préstamos propios. Marca las tareas adicionales. Solo Administración gestiona usuarios y roles.</p>
+                <?php foreach (Auth::PERMISOS as $clave => $etiqueta): ?>
+                <p><label><input type="checkbox" name="permiso" value="<?= $clave ?>"> <?= $etiqueta ?></label></p>
+                <?php endforeach; ?>
+            </fieldset>
             <p class="form-error" id="rolError" hidden></p>
         </div>
         <div class="dialogo__pie">
