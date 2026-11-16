@@ -25,7 +25,7 @@ $modulos = [
     <meta charset="UTF-8">
     <meta name="csrf-token" content="<?= htmlspecialchars(Auth::token(), ENT_QUOTES, 'UTF-8') ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($tituloPagina) ?> | MedLab</title>
+    <title>MedLab | <?= htmlspecialchars($tituloPagina) ?></title><link rel="icon" type="image/svg+xml" href="assets/logo.svg">
     <link rel="stylesheet" href="css/styles.css?v=<?= filemtime(__DIR__ . '/../css/styles.css') ?>">
     <?php if (!empty($estiloPagina) && in_array($estiloPagina, ['inventario.css','prestamos.css'], true)): ?>
     <link rel="stylesheet" href="css/<?= htmlspecialchars($estiloPagina) ?>?v=<?= filemtime(__DIR__ . '/../css/' . $estiloPagina) ?>">
@@ -37,7 +37,7 @@ $modulos = [
                 aria-label="Abrir menú" aria-expanded="false" aria-controls="menuLateral">
             <span></span><span></span><span></span>
         </button>
-        <a class="brand topbar__brand" href="index.php"><img src="assets/logo.svg" alt="" width="44" height="44"><span>MedLab<small>LABORATORIO DE MEDICINA</small></span></a>
+        <a class="brand topbar__brand" href="index.php"><img src="assets/logo-electrico.svg" alt="" width="44" height="44"><span>MedLab<small>LABORATORIO DE MEDICINA</small></span></a>
         <span class="topbar__description">Gestión de equipos de laboratorio</span>
     </header>
 
@@ -51,7 +51,7 @@ $modulos = [
         </div>
         <nav class="drawer__nav line-sidebar" aria-label="Secciones de MedLab">
             <?php foreach ($modulos as $modulo): ?>
-                <?php if ($modulo['archivo'] === null || (in_array($modulo['clave'], ['usuarios', 'roles', 'categorias', 'estados_eq', 'condiciones', 'reportes'], true) && !Auth::esAdministrador())) continue; ?>
+                <?php if ($modulo['archivo'] === null || (in_array($modulo['clave'], ['usuarios', 'roles'], true) && !Auth::esAdministrador()) || (in_array($modulo['clave'], ['categorias','estados_eq','condiciones'], true) && !Auth::puede('catalogos')) || ($modulo['clave'] === 'reportes' && !Auth::puede('reportes'))) continue; ?>
                 <a class="nav-link<?= $modulo['clave'] === $paginaActiva ? ' active' : '' ?>" href="<?= htmlspecialchars($modulo['archivo']) ?>"<?= $modulo['clave'] === $paginaActiva ? ' aria-current="page"' : '' ?>>
                     <span class="line-sidebar__marker" aria-hidden="true"></span>
                     <span class="line-sidebar__label"><?= htmlspecialchars($modulo['nombre']) ?></span>

@@ -1,10 +1,8 @@
-// ================= MÓDULO USUARIOS (CRUD) =================
 let API_USUARIOS = "api/admin/C_Usuarios.php";
 let API_ROLES = "api/admin/C_Roles.php";
 let usuarios = [];
 let roles = [];
 
-// ---------- CARGAR DATOS ----------
 async function cargarRoles() {
     try {
         let respuesta = await peticion(API_ROLES);
@@ -31,7 +29,6 @@ async function cargarUsuarios() {
     }
 }
 
-// ---------- LISTAR ----------
 function pintarUsuarios() {
     let texto = $("#buscador").value.trim().toLowerCase();
     let lista = usuarios.filter((u) =>
@@ -65,7 +62,6 @@ function pintarUsuarios() {
     $("#tablaUsuarios").innerHTML = filas;
 }
 
-// ---------- FORMULARIO ----------
 function abrirFormulario(usuario = null) {
     if (roles.length === 0) {
         mostrarAviso("Primero crea al menos un rol en el módulo Roles");
@@ -97,7 +93,6 @@ function abrirFormulario(usuario = null) {
     $("#usuarioCodigo").focus();
 }
 
-// ---------- GUARDAR (POST o PUT) ----------
 async function guardarUsuario(evento) {
     evento.preventDefault();
     limpiarError("#usuarioError");
@@ -128,7 +123,6 @@ async function guardarUsuario(evento) {
     }
 }
 
-// ---------- ELIMINAR ----------
 async function eliminarUsuario(id) {
     let usuario = usuarios.find((u) => u.id_usuario == id);
     if (!confirm(`¿Eliminar al usuario "${usuario.codigo_usuario}"?`)) return;
@@ -142,7 +136,6 @@ async function eliminarUsuario(id) {
     }
 }
 
-// ---------- EVENTOS ----------
 $("#botonNuevo").addEventListener("click", () => abrirFormulario());
 $("#botonCancelar").addEventListener("click", () => $("#dialogoUsuario").close());
 $("#formUsuario").addEventListener("submit", guardarUsuario);

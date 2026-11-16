@@ -81,7 +81,7 @@ class M_Prestamos {
         $this->query('INSERT INTO notificaciones (id_usuario,id_prestamo,evento,mensaje) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE id_notificacion=id_notificacion', [$user,$loan,$event,$message]);
     }
     private function notifyAdmins(int $loan): void {
-        $this->query("INSERT INTO notificaciones (id_usuario,id_prestamo,evento,mensaje) SELECT u.id_usuario,?,'SOLICITUD','Hay una nueva solicitud de préstamo pendiente.' FROM usuarios u INNER JOIN roles r ON r.id_rol=u.id_rol WHERE u.activo=1 AND LOWER(TRIM(r.nombre))='administrador' ON DUPLICATE KEY UPDATE id_notificacion=id_notificacion", [$loan]);
+        $this->query("INSERT INTO notificaciones (id_usuario,id_prestamo,evento,mensaje) SELECT u.id_usuario,?,'SOLICITUD','Hay una nueva solicitud de préstamo pendiente.' FROM usuarios u INNER JOIN roles r ON r.id_rol=u.id_rol WHERE u.activo=1 AND (LOWER(TRIM(r.nombre))='administrador' OR FIND_IN_SET('prestamos', r.permisos)>0) ON DUPLICATE KEY UPDATE id_notificacion=id_notificacion", [$loan]);
     }
     public function listar(int $user, bool $admin): array {
         $sql = "SELECT p.*,s.codigo AS estado,s.nombre AS estado_nombre,u.nombres,u.apellidos,u.codigo_usuario,CONCAT(u.nombres,' ',u.apellidos) AS solicitante,DATE_FORMAT(DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 1 MONTH),'%Y-%m-%d') AS fecha_maxima_devolucion FROM prestamos p INNER JOIN estados_prestamo s ON s.id_estado_prestamo=p.id_estado_prestamo INNER JOIN usuarios u ON u.id_usuario=p.id_usuario";

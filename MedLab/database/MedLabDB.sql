@@ -7,7 +7,8 @@ USE MedLabDB;
 CREATE TABLE roles (
     id_rol INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(30) NOT NULL UNIQUE,
-    descripcion VARCHAR(150)
+    descripcion VARCHAR(150),
+    permisos VARCHAR(255) DEFAULT NULL
 ) ENGINE = InnoDB;
 
 CREATE TABLE categorias (

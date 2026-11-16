@@ -7,14 +7,14 @@ $scriptPagina = 'prestamos.js';
 $estiloPagina = 'prestamos.css';
 require_once __DIR__ . '/includes/layout_inicio.php';
 ?>
-<div class="prestamos-page" id="prestamosApp" data-administrador="<?= Auth::esAdministrador() ? '1' : '0' ?>" data-usuario="<?= (int)$_SESSION['usuario']['id_usuario'] ?>">
+<div class="prestamos-page" id="prestamosApp" data-administrador="<?= Auth::puede('prestamos') ? '1' : '0' ?>" data-usuario="<?= (int)$_SESSION['usuario']['id_usuario'] ?>">
     <header class="page-header">
-        <div><h1>Préstamos</h1><p class="page-header__texto"><?= Auth::esAdministrador() ? 'Revisa solicitudes, registra entregas y recibe las devoluciones.' : 'Solicita equipos y consulta el estado de tus préstamos.' ?></p></div>
+        <div><h1>Préstamos</h1><p class="page-header__texto"><?= Auth::puede('prestamos') ? 'Revisa solicitudes, registra entregas y recibe las devoluciones.' : 'Solicita equipos y consulta el estado de tus préstamos.' ?></p></div>
         <button class="btn btn--primario" type="button" id="solicitarPrestamo">Solicitar préstamo</button>
     </header>
     <p class="form-error" id="prestamosError" role="alert" tabindex="-1" hidden></p>
     <section class="card" aria-labelledby="listaPrestamosTitulo">
-        <div class="loan-toolbar"><h2 id="listaPrestamosTitulo"><?= Auth::esAdministrador() ? 'Solicitudes y préstamos' : 'Mis solicitudes y préstamos' ?></h2><button class="btn btn--secundario" type="button" id="refrescarPrestamos">Actualizar</button></div>
+        <div class="loan-toolbar"><h2 id="listaPrestamosTitulo"><?= Auth::puede('prestamos') ? 'Solicitudes y préstamos' : 'Mis solicitudes y préstamos' ?></h2><button class="btn btn--secundario" type="button" id="refrescarPrestamos">Actualizar</button></div>
         <div class="loan-filters">
             <div class="campo"><label for="buscarPrestamo">Buscar por número, solicitante o equipo</label><input type="search" id="buscarPrestamo" autocomplete="off"></div>
             <div class="campo"><label for="filtrarEstadoPrestamo">Estado</label><select id="filtrarEstadoPrestamo"><option value="">Todos los estados</option><option value="PENDIENTE">Pendiente</option><option value="APROBADO">Aprobado</option><option value="ENTREGADO">Entregado</option><option value="DEVUELTO">Devuelto</option><option value="RECHAZADO">Rechazado</option><option value="CANCELADO">Cancelado</option><option value="RESERVA_VENCIDA">Reserva vencida</option></select></div>

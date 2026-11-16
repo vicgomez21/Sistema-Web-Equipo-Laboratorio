@@ -91,7 +91,6 @@ class M_Usuarios
         $this->response->success("Usuario eliminado correctamente", [], 1);
     }
 
-    # ---------- Métodos de apoyo ----------
 
     private function VALIDAR_DATOS(array $arrayData, bool $esNuevo): array
     {
